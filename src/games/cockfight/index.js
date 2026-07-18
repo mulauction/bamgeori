@@ -11,6 +11,8 @@ import { toast } from '../../ui/toast.js';
 import { create3D } from '../scene3d.js';
 import { makeVoxelChicken, makeCrowd, box } from '../voxel.js';
 import { makeBlobShadow } from '../visuals.js';
+import { countdown, celebrate } from '../../fx/drama.js';
+import { audio } from '../../core/audio.js';
 
 const CFG = CONFIG.cockfight;
 const REST = { blue: -2.0, red: 2.0 };
@@ -228,6 +230,8 @@ export default {
     buildScene();
     rollMatch();
     view.start(onFrame);
+    audio.startLoop('crowd'); // 구경꾼 웅성거림
+    audio.startLoop('bgm-fight'); // 유저 제공 배경음악(있으면)
   },
 
   isReady() {
@@ -245,8 +249,10 @@ export default {
   },
 
   async start(/* bet */) {
+    await countdown(view.wrap); // "3·2·1·파이트!"
     busy = true;
     let turn = Math.random() < 0.5 ? 'blue' : 'red';
+    let risen = false;
     const sides = { blue, red };
     while (blue.cur > 0 && red.cur > 0) {
       const atkSide = turn;
@@ -255,17 +261,24 @@ export default {
       sides[defSide].cur = Math.max(0, sides[defSide].cur - dmg);
       await lunge(atkSide);
       hpEl[defSide].style.width = (sides[defSide].cur / sides[defSide].hp) * 100 + '%';
+      // 어느 한쪽이 위태로우면 고조음 1회
+      if (!risen && (sides.blue.cur / sides.blue.hp < 0.25 || sides.red.cur / sides.red.hp < 0.25)) {
+        risen = true;
+        audio.play('riser');
+      }
       await wait(200);
       turn = defSide;
     }
     const winSide = blue.cur > 0 ? 'blue' : 'red';
     toast('🏆 승자: ' + sides[winSide].name);
-    await wait(500);
+    await celebrate(view.wrap, { title: '🏆 ' + sides[winSide].name + ' 승리!', sub: pick === winSide ? '적중!' : '' });
     busy = false;
     return { win: pick === winSide, multiplier: CFG.multiplier };
   },
 
   unmount() {
+    audio.stopLoop('crowd');
+    audio.stopLoop('bgm-fight');
     if (view) view.dispose();
     if (pickBox) pickBox.remove();
     const bars = document.querySelector('#screen .hpbars');

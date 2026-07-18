@@ -11,6 +11,22 @@ import { toast } from '../../ui/toast.js';
 import { create3D } from '../scene3d.js';
 import { makeVoxelPerson, box } from '../voxel.js';
 import { makeGlow, makeBlobShadow } from '../visuals.js';
+import { audio } from '../../core/audio.js';
+
+// 눈 달린 구경꾼(카메라를 쳐다봄)
+function addOnlooker(scene, x, z, shirt) {
+  const p = makeVoxelPerson({ shirt });
+  p.position.set(x, 0, z);
+  p.add(makeBlobShadow(0.55));
+  const eyeMat = new THREE.MeshBasicMaterial({ color: 0x141018 });
+  [-0.13, 0.13].forEach((ex) => {
+    const e = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.09, 0.09), eyeMat);
+    e.position.set(ex, 1.95, 0.31);
+    p.add(e);
+  });
+  scene.add(p);
+  return p;
+}
 
 const CFG = CONFIG.yabawi;
 
@@ -80,10 +96,10 @@ function buildScene() {
   });
 
   // 주인 NPC (좌판 뒤)
-  const keeper = makeVoxelPerson({ skin: 0xe6b58c, shirt: 0x5b3a2a, pants: 0x2b2136 });
-  keeper.position.set(0, 0, -1.0);
-  keeper.add(makeBlobShadow(0.6));
-  scene.add(keeper);
+  // 주인 + 구경꾼(눈빛으로 지켜봄)
+  addOnlooker(scene, 0, -1.0, 0x5b3a2a); // 주인
+  addOnlooker(scene, -1.7, -0.9, 0x35506e);
+  addOnlooker(scene, 1.7, -0.9, 0x6e3550);
 
   // 컵 3개
   cups = [];
@@ -172,6 +188,8 @@ export default {
     view.canvas.addEventListener('pointerdown', onPointer);
 
     view.start(onFrame);
+    audio.startLoop('crowd'); // 포장마차 웅성거림
+    audio.startLoop('bgm-yabawi'); // 유저 제공 배경음악(있으면)
   },
 
   reset() {
@@ -198,6 +216,8 @@ export default {
     await wait(500);
     marble.visible = false;
 
+    // 셔플 시작 — 긴장 고조음
+    audio.play('riser');
     // 셔플 (슬롯 스왑 → 위치 트윈)
     for (let s = 0; s < CFG.shuffleTimes; s++) {
       const a = Math.floor(Math.random() * CFG.cups);
@@ -220,6 +240,8 @@ export default {
   },
 
   unmount() {
+    audio.stopLoop('crowd');
+    audio.stopLoop('bgm-yabawi');
     if (view) {
       view.canvas.removeEventListener('pointerdown', onPointer);
       view.dispose();

@@ -12,6 +12,8 @@ import { toast } from '../../ui/toast.js';
 import { create3D } from '../scene3d.js';
 import { makeVoxelDog, makeCrowd, box } from '../voxel.js';
 import { makeGlow, makeBlobShadow } from '../visuals.js';
+import { countdown, celebrate } from '../../fx/drama.js';
+import { audio } from '../../core/audio.js';
 
 const DOGS = CONFIG.dograce.dogs;
 const START_X = 1;
@@ -128,6 +130,11 @@ function onFrame(_t, dt) {
       const boost = i === race.winner && el > 0.7 ? (el - 0.7) * 0.25 : 0;
       pos[i] = Math.min(1, el * speeds[i] + wob + boost);
     }
+    // 결과 직전 고조음 1회
+    if (raw > 0.66 && !race.risen) {
+      race.risen = true;
+      audio.play('riser');
+    }
     applyDogs(dt, slow);
     if (raw >= 1) {
       race.hold = (race.hold || 0) + dt;
@@ -180,6 +187,8 @@ export default {
     view.camera.position.set(camX - 2, 6.4, 12.5);
     view.camera.lookAt(camX + 2.5, 0.4, 0);
     view.start(onFrame);
+    audio.startLoop('crowd'); // 경기장 웅성거림
+    audio.startLoop('bgm-race'); // 유저 제공 배경음악(있으면)
   },
 
   isReady() {
@@ -196,21 +205,29 @@ export default {
   },
 
   async start(/* bet */) {
+    // 프리 레이스: 카운트다운으로 긴장 고조
+    await countdown(view.wrap);
     busy = true;
     const winner = weightedWinner();
-    speeds = DOGS.map((_, i) => (i === winner ? 1 : 0.8 + Math.random() * 0.14));
-    race = { winner, dur: 4200 + Math.random() * 800, startT: null, active: true, hold: 0, resolve: null };
+    // 코 차이 연출: 라이벌 1마리를 우승견 바로 뒤까지(결과 불변, 시각 연출만)
+    let rival = winner;
+    while (rival === winner) rival = Math.floor(Math.random() * DOGS.length);
+    speeds = DOGS.map((_, i) => (i === winner ? 1 : i === rival ? 0.965 : 0.78 + Math.random() * 0.12));
+    race = { winner, dur: 4600 + Math.random() * 700, startT: null, active: true, hold: 0, risen: false, resolve: null };
     await new Promise((resolve) => {
       race.resolve = resolve;
     });
     toast('🏁 우승: ' + DOGS[winner].name);
-    await wait(400);
+    // 피니시 셀레브레이션(길게)
+    await celebrate(view.wrap, { title: '🏆 ' + DOGS[winner].name + ' 우승!', sub: pick === winner ? '적중!' : '' });
     busy = false;
     // 승리 시 배수는 내가 고른 개의 배당
     return { win: pick === winner, multiplier: DOGS[pick].odds };
   },
 
   unmount() {
+    audio.stopLoop('crowd');
+    audio.stopLoop('bgm-race');
     if (view) view.dispose();
     if (pickBox) pickBox.remove();
     view = null;
