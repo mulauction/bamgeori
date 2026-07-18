@@ -1,58 +1,137 @@
 // ══════════════════════════════════════════════════════════════
-//  야바위 — 3컵 중 구슬이 든 컵 맞히기 (1층: 순수 운)
-//  공통 인터페이스: mount / start / reset / unmount
-//  정산은 하지 않는다(economy가 일괄 처리). start는 {win, multiplier} 반환.
+//  야바위 (3D) — 포장마차 내부. 나무 좌판 위 복셀 컵 3개가 실제 3D로 섞임.
+//  컵을 탭(레이캐스트)해 선택, 들어올리면 구슬. 주인 NPC가 좌판 뒤에 섬.
+//  로직·확률·정산 인터페이스는 2D판과 동일(legacy2d.js 보존). 표현만 3D.
 // ══════════════════════════════════════════════════════════════
 
+import * as THREE from 'three';
 import { CONFIG } from '../../core/economy.js';
 import { wait } from '../../ui/util.js';
 import { toast } from '../../ui/toast.js';
+import { create3D } from '../scene3d.js';
+import { makeVoxelPerson, box } from '../voxel.js';
 
 const CFG = CONFIG.yabawi;
 
-let wrap = null; // 컵이 놓이는 컨테이너
-let ball = 0; // 구슬이 든 슬롯
-let slots = []; // 각 컵 엘리먼트가 현재 위치한 슬롯 인덱스
-let pickResolve = null; // 플레이어 선택을 기다리는 resolver
+const SLOT_X = [-1.15, 0, 1.15];
+const COUNTER_TOP = 1.0;
+const CUP_H = 0.62;
+const REST_Y = COUNTER_TOP + CUP_H / 2;
+const LIFT_Y = REST_Y + 0.8;
+
+let view = null;
+let cups = []; // { group, body, index, slot, tx, ty, lifted }
+let cupBodies = [];
+let marble = null;
+let ball = 0;
 let pickable = false;
+let pickResolve = null;
+let onPointer = null;
 
-function slotX(i) {
-  const w = wrap.clientWidth;
-  const cw = Math.min(w * 0.26, 92);
-  return w / 2 - cw * 1.5 - 12 + i * (cw + 12);
+function slotX(slot) {
+  return SLOT_X[slot];
+}
+function setLift(cup, lifted) {
+  cup.lifted = lifted;
+  cup.ty = lifted ? LIFT_Y : REST_Y;
+}
+function placeInstant(cup) {
+  cup.tx = slotX(cup.slot);
+  cup.ty = cup.lifted ? LIFT_Y : REST_Y;
+  cup.group.position.set(cup.tx, cup.ty, 0);
 }
 
-function buildCups() {
-  wrap.innerHTML = '';
-  slots = [];
+function buildScene() {
+  const { scene } = view;
+
+  scene.add(new THREE.AmbientLight(0x554f70, 1.0));
+  const lantern = new THREE.PointLight(0xffb347, 1.2, 14);
+  lantern.position.set(0, 3.0, 1.6);
+  scene.add(lantern);
+  const key = new THREE.DirectionalLight(0xfff0d0, 0.35);
+  key.position.set(2, 5, 4);
+  scene.add(key);
+
+  // 좌판(카운터)
+  const counter = box(3.2, 1.0, 1.3, 0x8a5c33);
+  counter.position.set(0, 0.5, 0);
+  scene.add(counter);
+  const top = box(3.24, 0.08, 1.34, 0xa06a3e);
+  top.position.set(0, 1.02, 0);
+  scene.add(top);
+
+  // 천막(줄무늬 느낌은 두 조각으로 근사)
+  const awning = box(3.6, 0.22, 1.7, 0xe0512f);
+  awning.position.set(0, 2.75, 0.1);
+  scene.add(awning);
+  const stripe = box(3.62, 0.24, 0.28, 0xefe6d8);
+  stripe.position.set(0, 2.75, -0.4);
+  scene.add(stripe);
+  // 기둥
+  [-1.6, 1.6].forEach((x) => {
+    const pole = box(0.14, 2.7, 0.14, 0x6a4a2a);
+    pole.position.set(x, 1.35, 0.7);
+    scene.add(pole);
+  });
+
+  // 주인 NPC (좌판 뒤)
+  const keeper = makeVoxelPerson({ skin: 0xe6b58c, shirt: 0x5b3a2a, pants: 0x2b2136 });
+  keeper.position.set(0, 0, -1.0);
+  scene.add(keeper);
+
+  // 컵 3개
+  cups = [];
+  cupBodies = [];
   for (let i = 0; i < CFG.cups; i++) {
-    const c = document.createElement('div');
-    c.className = 'cup';
-    c.dataset.idx = i;
-    c.innerHTML = '<div class="ball"></div><div class="cupbody"></div>';
-    c.style.left = slotX(i) + 'px';
-    c.onclick = () => pick(i);
-    wrap.appendChild(c);
-    slots[i] = i;
+    const group = new THREE.Group();
+    const body = box(0.62, CUP_H, 0.62, 0xc9402b);
+    body.userData.cupIndex = i;
+    group.add(body);
+    const rim = box(0.66, 0.1, 0.66, 0xe86a4f);
+    rim.position.y = CUP_H / 2 - 0.05;
+    group.add(rim);
+    scene.add(group);
+    const cup = { group, body, index: i, slot: i, tx: 0, ty: REST_Y, lifted: false };
+    placeInstant(cup);
+    cups.push(cup);
+    cupBodies.push(body);
   }
+
+  // 구슬
+  marble = box(0.24, 0.24, 0.24, 0xffc247);
+  marble.position.set(slotX(ball), COUNTER_TOP + 0.13, 0.05);
+  marble.visible = false;
+  scene.add(marble);
 }
 
-async function pick(idx) {
+function onFrame(_t, dt) {
+  const k = Math.min(1, dt * 0.012);
+  for (const cup of cups) {
+    const p = cup.group.position;
+    p.x += (cup.tx - p.x) * k;
+    p.y += (cup.ty - p.y) * k;
+  }
+  if (cups[ball]) marble.position.x = cups[ball].group.position.x;
+}
+
+async function pick(cup) {
   if (!pickable) return;
   pickable = false;
-  const cups = [...wrap.children];
-  const picked = cups[idx];
-  picked.classList.add('lift');
-  const hit = +idx === ball;
-  if (hit) picked.querySelector('.ball').classList.add('show');
+  setLift(cup, true);
+  const hit = cup.index === ball;
+  if (hit) {
+    marble.position.x = cup.group.position.x;
+    marble.visible = true;
+  }
   await wait(700);
   if (!hit) {
-    cups[ball].classList.add('lift');
-    cups[ball].querySelector('.ball').classList.add('show');
+    setLift(cups[ball], true);
+    marble.visible = true;
     await wait(600);
   }
-  pickResolve?.({ win: hit, multiplier: CFG.multiplier });
+  const resolve = pickResolve;
   pickResolve = null;
+  resolve?.({ win: hit, multiplier: CFG.multiplier });
 }
 
 export default {
@@ -64,49 +143,69 @@ export default {
   kind: 'wager',
 
   mount(container /* , ctx */) {
-    container.className = 'yabawi-wrap';
-    wrap = container;
-    buildCups();
+    view = create3D(container, { height: 280, fov: 50, bg: 0x140f1e });
+    view.camera.position.set(0, 2.5, 4.5);
+    view.camera.lookAt(0, 1.15, -0.1);
+    buildScene();
+
+    const hint = document.createElement('div');
+    hint.className = 'cv3d-hint';
+    hint.textContent = '컵을 탭해서 고르세요';
+    view.wrap.appendChild(hint);
+
+    onPointer = (e) => {
+      if (!pickable) return;
+      const p = e.changedTouches ? e.changedTouches[0] : e;
+      const hits = view.raycast(p.clientX, p.clientY, cupBodies);
+      if (hits.length) {
+        const idx = hits[0].object.userData.cupIndex;
+        const cup = cups.find((c) => c.index === idx);
+        if (cup) pick(cup);
+      }
+    };
+    view.canvas.addEventListener('pointerdown', onPointer);
+
+    view.start(onFrame);
   },
 
   reset() {
     pickable = false;
     pickResolve = null;
-    buildCups();
+    if (marble) marble.visible = false;
+    cups.forEach((c, i) => {
+      c.slot = i;
+      c.lifted = false;
+      placeInstant(c);
+    });
   },
 
-  // 판돈은 이미 economy.takeBet에서 차감됨. 여기서는 연출 + 결과 판정만.
   async start(/* bet */) {
-    buildCups();
+    this.reset();
     ball = Math.floor(Math.random() * CFG.cups);
 
     // 구슬을 보여준 뒤 감춘다
-    const bc = wrap.children[ball];
-    bc.querySelector('.ball').classList.add('show');
-    bc.classList.add('lift');
+    marble.position.x = slotX(cups[ball].slot);
+    marble.visible = true;
+    setLift(cups[ball], true);
     await wait(900);
-    bc.classList.remove('lift');
-    await wait(400);
-    bc.querySelector('.ball').classList.remove('show');
+    setLift(cups[ball], false);
+    await wait(500);
+    marble.visible = false;
 
-    // 셔플
+    // 셔플 (슬롯 스왑 → 위치 트윈)
     for (let s = 0; s < CFG.shuffleTimes; s++) {
       const a = Math.floor(Math.random() * CFG.cups);
       let b = Math.floor(Math.random() * CFG.cups);
       if (b === a) b = (a + 1) % CFG.cups;
-      const ca = [...wrap.children].find((c) => slots[c.dataset.idx] === a);
-      const cb = [...wrap.children].find((c) => slots[c.dataset.idx] === b);
-      slots[ca.dataset.idx] = b;
-      slots[cb.dataset.idx] = a;
-      const speed = Math.max(120, 300 - s * 25);
-      ca.style.transition = 'left ' + speed + 'ms steps(5)';
-      cb.style.transition = 'left ' + speed + 'ms steps(5)';
-      ca.style.left = slotX(b) + 'px';
-      cb.style.left = slotX(a) + 'px';
-      await wait(speed + 40);
+      const cupA = cups.find((c) => c.slot === a);
+      const cupB = cups.find((c) => c.slot === b);
+      cupA.slot = b;
+      cupB.slot = a;
+      cupA.tx = slotX(b);
+      cupB.tx = slotX(a);
+      await wait(Math.max(160, 320 - s * 20));
     }
 
-    // 플레이어가 컵을 고를 때까지 대기
     pickable = true;
     toast('구슬이 든 컵을 고르세요');
     return new Promise((resolve) => {
@@ -115,9 +214,16 @@ export default {
   },
 
   unmount() {
-    if (wrap) wrap.innerHTML = '';
-    wrap = null;
-    pickResolve = null;
+    if (view) {
+      view.canvas.removeEventListener('pointerdown', onPointer);
+      view.dispose();
+    }
+    view = null;
+    cups = [];
+    cupBodies = [];
+    marble = null;
     pickable = false;
+    pickResolve = null;
+    onPointer = null;
   },
 };

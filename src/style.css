@@ -70,6 +70,12 @@ body{background:var(--bg);color:var(--paper);font-family:sans-serif;overflow-x:h
 /* ── 게임 캔버스 공통 ── */
 .gamecv{width:100%;height:auto;border:2px solid var(--line);border-radius:6px;background:#000;margin-bottom:12px;image-rendering:pixelated}
 
+/* ── 3D 미니게임 뷰 ── */
+.cv3d-wrap{position:relative;width:100%;margin-bottom:12px;border:2px solid var(--line);border-radius:6px;overflow:hidden;background:#000}
+.cv3d{width:100%;display:block;touch-action:none}
+.cv3d-hint{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:12px;font-weight:700;
+  color:var(--paper);text-shadow:0 1px 3px #000;pointer-events:none}
+
 /* ── 개경주 / 닭싸움 선택 ── */
 .dogpick{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
 .dogbtn{background:var(--panel);border:2px solid var(--line);color:var(--paper);border-radius:4px;
