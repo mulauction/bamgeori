@@ -151,8 +151,6 @@ const PARK = {
   car: { x: 44, name: '중고차', build: () => makeCar(0x3a6ea5) },
   sport: { x: 68, name: '스포츠카', build: () => makeSport(0xff5964) },
 };
-// 금목걸이는 자산(부동산 등급) 보유 시 표시
-const NECKLACE_ITEMS = ['apt', 'bld', 'statue'];
 
 export function createLiveliness(scene, hero, count = 6) {
   // 행인
@@ -169,7 +167,7 @@ export function createLiveliness(scene, hero, count = 6) {
   // 과시템 반영(한번 사면 유지 — 제거 없음)
   const vehicles = {};
   function refreshFlex() {
-    hero.setNecklace(NECKLACE_ITEMS.some((id) => store.hasAsset(id)));
+    hero.setEquipped(new Set(store.getAssets())); // 착용 과시템 반영
     for (const id of Object.keys(PARK)) {
       if (store.hasAsset(id) && !vehicles[id]) {
         const v = PARK[id].build();

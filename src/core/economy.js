@@ -59,13 +59,19 @@ export const CONFIG = {
 
 // ── 전당포(과시템) 가격 ──────────────────────────────────────────
 // 포인트로 구매하지만 판돈으로 되돌릴 수 없는 순수 과시 아이템.
+// cat: 'wear'(착용) | 'ride'(탈것) | 'space'(공간). slot: 착용 아이템은 캐릭터 반영 키.
 export const WARES = [
-  { id: 'bike', icon: '🚲', name: '중고 자전거', desc: '그래도 걷는 것보단 낫다', price: 5000 },
-  { id: 'car', icon: '🚙', name: '중고차', desc: '골목에서 처음 받는 시선', price: 30000 },
-  { id: 'sport', icon: '🏎️', name: '스포츠카', desc: '포장마차 앞 주차 금지 무시 가능', price: 200000 },
-  { id: 'apt', icon: '🏠', name: '강변 아파트', desc: '닭싸움장 사장이 인사를 한다', price: 1000000 },
-  { id: 'bld', icon: '🏢', name: '골목 빌딩', desc: '이 거리 가게들이 내 세입자', price: 5000000 },
-  { id: 'statue', icon: '🗿', name: '광장 동상', desc: '거리 이름이 당신 이름으로 바뀝니다', price: 20000000 },
+  { id: 'bike', icon: '🚲', name: '중고 자전거', desc: '그래도 걷는 것보단 낫다', price: 5000, cat: 'ride' },
+  { id: 'sunglasses', icon: '🕶️', name: '선글라스', desc: '밤에도 낀다. 그게 멋이다', price: 8000, cat: 'wear' },
+  { id: 'hat', icon: '🎩', name: '중절모', desc: '골목 신사의 기본', price: 15000, cat: 'wear' },
+  { id: 'car', icon: '🚙', name: '중고차', desc: '골목에서 처음 받는 시선', price: 30000, cat: 'ride' },
+  { id: 'goldshoes', icon: '👟', name: '금 신발', desc: '한 걸음마다 반짝인다', price: 40000, cat: 'wear' },
+  { id: 'necklace', icon: '📿', name: '금목걸이', desc: '원거리에서도 보이는 부의 신호', price: 120000, cat: 'wear' },
+  { id: 'sport', icon: '🏎️', name: '스포츠카', desc: '포장마차 앞 주차 금지 무시 가능', price: 200000, cat: 'ride' },
+  { id: 'aura', icon: '✨', name: '황금 오라', desc: '몸에서 빛이 난다. 진짜로', price: 500000, cat: 'wear' },
+  { id: 'apt', icon: '🏠', name: '강변 아파트', desc: '닭싸움장 사장이 인사를 한다', price: 1000000, cat: 'space' },
+  { id: 'bld', icon: '🏢', name: '골목 빌딩', desc: '이 거리 가게들이 내 세입자', price: 5000000, cat: 'space' },
+  { id: 'statue', icon: '🗿', name: '광장 동상', desc: '거리 이름이 당신 이름으로 바뀝니다', price: 20000000, cat: 'space' },
 ];
 
 // ══════════════════════════════════════════════════════════════

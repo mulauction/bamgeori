@@ -4,7 +4,7 @@
 // ══════════════════════════════════════════════════════════════
 
 import * as THREE from 'three';
-import { makeBlobShadow } from '../games/visuals.js';
+import { makeBlobShadow, makeGlow } from '../games/visuals.js';
 
 function canvasTex(w, h, draw) {
   const c = document.createElement('canvas');
@@ -107,14 +107,41 @@ export function createHero() {
   collar.position.set(0, 1.72, 0);
   hero.add(collar);
 
-  // 금목걸이(과시템 보유 시 표시) — 목 높이 금색 링
+  // ── 착용 과시템(보유 시 표시) ──
+  // 📿 금목걸이
   const necklace = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.06, 6, 12), new THREE.MeshLambertMaterial({ color: 0xffc247 }));
   necklace.rotation.x = Math.PI / 2;
   necklace.position.y = 1.72;
   necklace.visible = false;
   hero.add(necklace);
-  function setNecklace(on) {
-    necklace.visible = !!on;
+  // 🎩 중절모 (챙 + 윗통)
+  const hat = new THREE.Group();
+  const brim = new THREE.Mesh(boxG(1.0, 0.06, 1.0), mat(0x1a141f));
+  brim.position.y = 2.55;
+  hat.add(brim);
+  const crown = new THREE.Mesh(boxG(0.62, 0.4, 0.62), mat(0x241a30));
+  crown.position.y = 2.78;
+  hat.add(crown);
+  hat.visible = false;
+  hero.add(hat);
+  // 🕶️ 선글라스
+  const sunglasses = new THREE.Mesh(boxG(0.6, 0.15, 0.06), mat(0x0a0a10));
+  sunglasses.position.set(0, 2.12, 0.42);
+  sunglasses.visible = false;
+  hero.add(sunglasses);
+  // ✨ 황금 오라 (발광 스프라이트)
+  const aura = makeGlow(0xffc247, 3.6);
+  aura.position.y = 1.3;
+  aura.visible = false;
+  hero.add(aura);
+
+  // 보유 자산 Set을 받아 착용 반영 (👟 금신발은 신발 색 변경)
+  function setEquipped(owned) {
+    necklace.visible = owned.has('necklace');
+    hat.visible = owned.has('hat');
+    sunglasses.visible = owned.has('sunglasses');
+    aura.visible = owned.has('aura');
+    shoeMat.color.setHex(owned.has('goldshoes') ? 0xffc247 : 0x1b1522);
   }
 
   // 발밑 블롭 그림자(접지감). 점프 시에도 바닥에 남도록 y 보정.
@@ -146,5 +173,5 @@ export function createHero() {
     shabbyMats.forEach((m, i) => m.color.setHex(on ? 0x4a4652 : originalHex[i]));
   }
 
-  return { group: hero, applyPose, setShabby, setNecklace };
+  return { group: hero, applyPose, setShabby, setEquipped };
 }
