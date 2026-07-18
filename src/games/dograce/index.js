@@ -113,8 +113,8 @@ function applyDogs(dt, slow) {
   for (let i = 1; i < pos.length; i++) if (pos[i] > pos[lead]) lead = i;
   const leadX = START_X + pos[lead] * (FINISH_X - START_X);
   camX += (leadX - camX) * 0.06;
-  view.camera.position.set(camX - 3.5, 5.2, 9.5);
-  view.camera.lookAt(camX + 3, 1.0, -0.5);
+  view.camera.position.set(camX - 2, 6.4, 12.5);
+  view.camera.lookAt(camX + 2.5, 0.4, 0);
 }
 
 function onFrame(_t, dt) {
@@ -174,11 +174,11 @@ export default {
     container.appendChild(pickBox);
     buildPicks();
 
-    view = create3D(container, { height: 260, fov: 55, bg: 0x0c1020, fog: { color: 0x0c1020, near: 22, far: 44 } });
+    view = create3D(container, { height: 300, fov: 52, bg: 0x0c1020, fog: { color: 0x0c1020, near: 26, far: 52 } });
     camX = START_X;
     buildScene();
-    view.camera.position.set(camX - 3.5, 5.2, 9.5);
-    view.camera.lookAt(camX + 3, 1.0, -0.5);
+    view.camera.position.set(camX - 2, 6.4, 12.5);
+    view.camera.lookAt(camX + 2.5, 0.4, 0);
     view.start(onFrame);
   },
 
