@@ -7,6 +7,7 @@
 import { createScene, SHOPS } from './scene.js';
 import { createHero } from './character.js';
 import { createControls } from './controls.js';
+import { audio } from '../core/audio.js';
 
 /**
  * @param {object} opts
@@ -37,6 +38,7 @@ export function createStreet({ onEnter }) {
   window.addEventListener('resize', resize);
 
   let prevT = 0;
+  let stepAcc = 0; // 발소리 스로틀
   function loop(t) {
     requestAnimationFrame(loop);
     if (!active) return;
@@ -64,6 +66,17 @@ export function createStreet({ onEnter }) {
       H.phase += dt * 0.012;
     } else {
       H.phase *= 0.85;
+    }
+
+    // 발소리 (이동 중, 지면, 스로틀)
+    if (moving && H.y <= 0.001) {
+      stepAcc += dt;
+      if (stepAcc > 340) {
+        audio.play('footstep');
+        stepAcc = 0;
+      }
+    } else {
+      stepAcc = 0;
     }
 
     // 점프

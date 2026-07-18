@@ -12,6 +12,8 @@ body{background:var(--bg);color:var(--paper);font-family:sans-serif;overflow-x:h
   padding:calc(10px + env(safe-area-inset-top)) calc(14px + env(safe-area-inset-right)) 10px calc(14px + env(safe-area-inset-left));
   background:var(--bg);border-bottom:3px solid var(--line)}
 #topbar .logo{font-weight:900;font-size:16px;color:var(--lantern)}
+#mutebtn{background:none;border:2px solid var(--line);border-radius:6px;color:var(--paper);
+  font-size:16px;padding:3px 9px;cursor:pointer;line-height:1.4}
 #wallet{font-weight:900;font-size:19px;color:var(--amber);transition:transform .15s}
 #wallet.bump{transform:scale(1.15)}
 #wallet small{font-size:11px;color:var(--dim);font-weight:400}

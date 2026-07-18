@@ -6,6 +6,7 @@
 import './style.css';
 
 import { store } from './core/store.js';
+import { audio } from './core/audio.js';
 import { initHud } from './ui/hud.js';
 import { createStreet } from './street/index.js';
 import { mountGameScreen } from './ui/gameScreen.js';
@@ -95,9 +96,38 @@ function closeScreen() {
   window.scrollTo(0, 0);
 }
 
+// ── 사운드: 음소거 상태 동기화 + 첫 제스처 unlock + 음소거 토글 버튼 ──
+function initAudioControls() {
+  audio.setMuted(store.isMuted());
+
+  // 모바일 웹뷰 정책: 첫 유저 제스처에서만 오디오 시작
+  const unlock = () => {
+    audio.unlock();
+    if (!store.isMuted()) audio.startLoop('ambience');
+  };
+  window.addEventListener('pointerdown', unlock, { once: true });
+  window.addEventListener('touchstart', unlock, { once: true });
+
+  // 음소거 토글 버튼(상단바)
+  const btn = document.createElement('button');
+  btn.id = 'mutebtn';
+  const paint = () => (btn.textContent = store.isMuted() ? '🔇' : '🔊');
+  paint();
+  btn.onclick = () => {
+    const next = !store.isMuted();
+    store.setMuted(next);
+    audio.setMuted(next);
+    if (next) audio.stopLoop('ambience');
+    else audio.startLoop('ambience');
+    paint();
+  };
+  document.getElementById('topbar').insertBefore(btn, document.getElementById('wallet'));
+}
+
 // ── 부팅 ──
-store.init(); // 저장본 로드(포인트·자산 복원)
+store.init(); // 저장본 로드(포인트·자산·설정 복원)
 initHud();
+initAudioControls();
 const street = createStreet({ onEnter: openScreen });
 
 // 안드로이드 하드웨어 뒤로가기 → 씬 닫기(홈이면 앱 종료)

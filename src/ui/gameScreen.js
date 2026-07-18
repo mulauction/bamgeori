@@ -104,7 +104,10 @@ export function mountGameScreen(container, game, onBack) {
       result.textContent = '';
       result.className = 'result';
       go.disabled = true;
+      audio.play('chip'); // 베팅 칩 소리
+      audio.startLoop('tension'); // 승부 중 긴장 루프
       const { win, multiplier } = await game.start(bet);
+      audio.stopLoop('tension');
       if (!alive) return;
       const gain = settleWager(store, { win, bet, multiplier, gameId: game.id });
       // 승리 등급 연출(fx) — 사운드/파티클/진동. 패배는 짧고 담백.
@@ -139,6 +142,7 @@ export function mountGameScreen(container, game, onBack) {
   return {
     unmount() {
       alive = false;
+      audio.stopLoop('tension'); // 중도 이탈 시 긴장 루프 정리
       game.unmount();
       scene.remove();
     },
