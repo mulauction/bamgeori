@@ -73,8 +73,10 @@ body.bankrupt{filter:brightness(.6) saturate(.5)}
 .betnow{font-weight:900;font-size:16px;margin-top:10px}
 
 /* ── 액션 버튼 / 결과 ── */
+/* 액션 버튼: 화면 하단 고정(항상 누를 수 있게) */
 .go{width:100%;border:none;border-radius:6px;padding:15px;font-weight:900;font-size:18px;cursor:pointer;
-  background:var(--lantern);color:#fff;box-shadow:0 5px 0 #8a1f27;font-family:sans-serif}
+  background:var(--lantern);color:#fff;box-shadow:0 5px 0 #8a1f27;font-family:sans-serif;
+  position:sticky;bottom:calc(12px + env(safe-area-inset-bottom));z-index:8}
 .go:active{transform:translateY(3px);box-shadow:0 2px 0 #8a1f27}
 .go:disabled{opacity:.35;box-shadow:none;transform:none}
 .result{margin-top:14px;text-align:center;font-weight:900;font-size:20px;min-height:26px}

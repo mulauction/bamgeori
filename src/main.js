@@ -125,28 +125,12 @@ function initAudioControls() {
   document.getElementById('topbar').insertBefore(btn, document.getElementById('wallet'));
 }
 
-// ── 낮/밤 토글 버튼(상단바) ──
-function initDayNight() {
-  const btn = document.createElement('button');
-  btn.id = 'daybtn';
-  const paint = () => (btn.textContent = store.isDay() ? '☀️' : '🌙');
-  paint();
-  btn.onclick = () => {
-    const next = !store.isDay();
-    store.setDay(next);
-    street.setDayNight(next);
-    paint();
-  };
-  document.getElementById('topbar').insertBefore(btn, document.getElementById('wallet'));
-}
-
 // ── 부팅 ──
 store.init(); // 저장본 로드(포인트·자산·설정 복원)
 initHud();
 initAudioControls();
 initBankruptcy(); // 파산·재기 연출(화면 명도·훈장 토스트)
-const street = createStreet({ onEnter: openScreen });
-initDayNight();
+const street = createStreet({ onEnter: openScreen }); // 낮/밤은 자동 시간 흐름
 
 // 안드로이드 하드웨어 뒤로가기 → 씬 닫기(홈이면 앱 종료)
 initBackButton({

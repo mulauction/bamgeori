@@ -250,37 +250,34 @@ export function createScene(canvas) {
   moonGlow.position.set(40, 26, -39.5);
   scene.add(moonGlow);
 
-  // ── 낮/밤 전환 ──
-  function setDayNight(day) {
-    if (day) {
-      scene.background.set(0x8fb8e8);
-      scene.fog.color.set(0x8fb8e8);
-      scene.fog.near = 40;
-      scene.fog.far = 110;
-      ambient.color.set(0xfff2d8);
-      ambient.intensity = 1.9;
-      hemi.color.set(0xaaccff);
-      hemi.groundColor.set(0x6a7a5a);
-      hemi.intensity = 1.0;
-      moonLight.color.set(0xfff0d0);
-      moonLight.intensity = 1.2;
-      moon.material.color.set(0xfff6c0); // 해
-      moonGlow.material.color.set(0xfff2b0);
-    } else {
-      scene.background.set(0x14122a);
-      scene.fog.color.set(0x14122a);
-      scene.fog.near = 24;
-      scene.fog.far = 70;
-      ambient.color.set(0x5a5686);
-      ambient.intensity = 1.35;
-      hemi.color.set(0x8a9ad0);
-      hemi.groundColor.set(0x241f38);
-      hemi.intensity = 0.7;
-      moonLight.color.set(0xbcc8ff);
-      moonLight.intensity = 0.6;
-      moon.material.color.set(0xffe9b0); // 달
-      moonGlow.material.color.set(0xffe9b0);
-    }
+  // ── 시간대(낮/밤) 보간 — k: 0=한밤, 1=한낮 ──
+  const NIGHT = {
+    bg: new THREE.Color(0x14122a), amb: new THREE.Color(0x5a5686), ai: 1.35,
+    hs: new THREE.Color(0x8a9ad0), hg: new THREE.Color(0x241f38), hi: 0.7,
+    mc: new THREE.Color(0xbcc8ff), mi: 0.6, orb: new THREE.Color(0xffe9b0),
+    fn: 24, ff: 70,
+  };
+  const DAY = {
+    bg: new THREE.Color(0x8fb8e8), amb: new THREE.Color(0xfff2d8), ai: 1.95,
+    hs: new THREE.Color(0xaaccff), hg: new THREE.Color(0x6a7a5a), hi: 1.05,
+    mc: new THREE.Color(0xfff0d0), mi: 1.25, orb: new THREE.Color(0xfff6c0),
+    fn: 42, ff: 115,
+  };
+  const lerp = (a, b, k) => a + (b - a) * k;
+  function setDaylight(k) {
+    scene.background.copy(NIGHT.bg).lerp(DAY.bg, k);
+    scene.fog.color.copy(NIGHT.bg).lerp(DAY.bg, k);
+    scene.fog.near = lerp(NIGHT.fn, DAY.fn, k);
+    scene.fog.far = lerp(NIGHT.ff, DAY.ff, k);
+    ambient.color.copy(NIGHT.amb).lerp(DAY.amb, k);
+    ambient.intensity = lerp(NIGHT.ai, DAY.ai, k);
+    hemi.color.copy(NIGHT.hs).lerp(DAY.hs, k);
+    hemi.groundColor.copy(NIGHT.hg).lerp(DAY.hg, k);
+    hemi.intensity = lerp(NIGHT.hi, DAY.hi, k);
+    moonLight.color.copy(NIGHT.mc).lerp(DAY.mc, k);
+    moonLight.intensity = lerp(NIGHT.mi, DAY.mi, k);
+    moon.material.color.copy(NIGHT.orb).lerp(DAY.orb, k);
+    moonGlow.material.color.copy(NIGHT.orb).lerp(DAY.orb, k);
   }
 
   function resize() {
@@ -292,5 +289,5 @@ export function createScene(canvas) {
     camera.updateProjectionMatrix();
   }
 
-  return { renderer, scene, camera, resize, setDayNight };
+  return { renderer, scene, camera, resize, setDaylight };
 }

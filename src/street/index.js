@@ -25,10 +25,14 @@ export function createStreet({ onEnter }) {
   const canvas = document.getElementById('gl');
   const enterBtn = document.getElementById('enterbtn');
 
-  const { renderer, scene, camera, resize, setDayNight } = createScene(canvas);
-  setDayNight(store.isDay()); // 저장된 낮/밤 설정 적용
+  const { renderer, scene, camera, resize, setDaylight } = createScene(canvas);
   const hero = createHero();
   scene.add(hero.group);
+
+  // 게임 내 시간 흐름(자동 낮/밤). 한 사이클 ≈ 100초. 밤에서 시작.
+  const DAY_CYCLE = 100000;
+  let clock = 0;
+  setDaylight(0);
 
   // 거리 생동감(행인·과시템) + 전광판
   const life = createLiveliness(scene, hero);
@@ -112,6 +116,11 @@ export function createStreet({ onEnter }) {
 
     life.update(dt); // 행인 배회
     marqueeCtl.pump(); // 전광판 문구 흐름
+
+    // 시간 흐름 → 부드러운 낮/밤 (0=한밤 ↔ 1=한낮)
+    clock += dt;
+    const frac = (clock % DAY_CYCLE) / DAY_CYCLE;
+    setDaylight(0.5 - 0.5 * Math.cos(frac * Math.PI * 2));
 
     // 이동 입력 (조이스틱 + 키보드), 길이 정규화
     let { ix, iz } = controls.getMoveInput();
@@ -219,6 +228,5 @@ export function createStreet({ onEnter }) {
       else resize(); // 홈 복귀 시 컨테이너 크기 재적용
     },
     resize,
-    setDayNight,
   };
 }

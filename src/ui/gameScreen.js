@@ -121,8 +121,8 @@ export function mountGameScreen(container, game, onBack) {
       go.disabled = false;
       game.reset?.();
     };
-    scene.appendChild(go);
     scene.appendChild(result);
+    scene.appendChild(go); // 결과 위, 화면 하단 고정
   } else {
     // ── 노동 게임: 판돈/버튼 없이 라운드 반복 ──
     scene.appendChild(result);
