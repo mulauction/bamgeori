@@ -6,6 +6,7 @@
 
 import * as THREE from 'three';
 import { store } from '../core/store.js';
+import { makeBlobShadow } from '../games/visuals.js';
 
 const box = (w, h, d, c) => new THREE.Mesh(new THREE.BoxGeometry(w, h, d), new THREE.MeshLambertMaterial({ color: c }));
 const SHIRTS = [0x3a6ea5, 0x9a5b3a, 0x4a7a4a, 0x7a4a7a, 0x8a8a3a, 0x5a5a8a];
@@ -40,6 +41,7 @@ function makeWalker(shirt) {
   const armR = new THREE.Mesh(armGeo, armMat);
   armR.position.set(0.4, 1.5, 0);
   g.add(armR);
+  g.add(makeBlobShadow(0.55));
   return { group: g, legL, legR, armL, armR };
 }
 
@@ -145,6 +147,7 @@ export function createLiveliness(scene, hero, count = 6) {
     for (const id of Object.keys(PARK)) {
       if (store.hasAsset(id) && !vehicles[id]) {
         const v = PARK[id].build();
+        v.add(makeBlobShadow(1.4));
         v.position.set(PARK[id].x, 0, 2.6);
         v.rotation.y = Math.PI / 2;
         scene.add(v);

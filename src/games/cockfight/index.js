@@ -10,6 +10,7 @@ import { wait } from '../../ui/util.js';
 import { toast } from '../../ui/toast.js';
 import { create3D } from '../scene3d.js';
 import { makeVoxelChicken, makeCrowd, box } from '../voxel.js';
+import { makeBlobShadow } from '../visuals.js';
 
 const CFG = CONFIG.cockfight;
 const REST = { blue: -2.0, red: 2.0 };
@@ -21,6 +22,7 @@ let jumpY = { blue: 0, red: 0 };
 let jumpV = { blue: 0, red: 0 };
 let phase = { blue: 0, red: 0 };
 let particles = [];
+let shadows = { blue: null, red: null };
 let shake = 0;
 
 let pickBox = null;
@@ -75,6 +77,15 @@ function buildScene() {
   scene.add(r.group);
   chickens = { blue: b, red: r };
 
+  // 바닥 그림자(점프해도 지면 고정 — 씬 직속으로 x만 추적)
+  const sb = makeBlobShadow(0.5);
+  sb.position.set(REST.blue, 0.05, 0);
+  scene.add(sb);
+  const sr = makeBlobShadow(0.5);
+  sr.position.set(REST.red, 0.05, 0);
+  scene.add(sr);
+  shadows = { blue: sb, red: sr };
+
   // 깃털 파티클 풀
   particles = [];
   const featherGeo = new THREE.BoxGeometry(0.12, 0.12, 0.03);
@@ -113,6 +124,7 @@ function onFrame(_t, dt) {
     g.position.y = jumpY[side];
     phase[side] += dt * 0.02 * (busy ? 1 : 0.3);
     chickens[side].animate(phase[side]);
+    if (shadows[side]) shadows[side].position.x = g.position.x; // 그림자는 지면 x만 추적
   }
   // 파티클
   for (const p of particles) {
@@ -260,6 +272,7 @@ export default {
     if (bars) bars.remove();
     view = null;
     chickens = { blue: null, red: null };
+    shadows = { blue: null, red: null };
     particles = [];
     pickBox = null;
     blue = red = null;

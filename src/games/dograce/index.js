@@ -11,6 +11,7 @@ import { wait } from '../../ui/util.js';
 import { toast } from '../../ui/toast.js';
 import { create3D } from '../scene3d.js';
 import { makeVoxelDog, makeCrowd, box } from '../voxel.js';
+import { makeGlow, makeBlobShadow } from '../visuals.js';
 
 const DOGS = CONFIG.dograce.dogs;
 const START_X = 1;
@@ -84,6 +85,9 @@ function buildScene() {
     const head = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.5, 0.3), new THREE.MeshBasicMaterial({ color: 0xffe9b0 }));
     head.position.set(x, 6.1, -5.2);
     scene.add(head);
+    const glow = makeGlow(0xffe9b0, 4);
+    glow.position.set(x, 6.1, -5.0);
+    scene.add(glow);
   });
 
   // 개 4마리
@@ -91,6 +95,7 @@ function buildScene() {
   DOGS.forEach((d, i) => {
     const obj = makeVoxelDog(new THREE.Color(d.color).getHex());
     obj.group.position.set(START_X, 0, LANES[i]);
+    obj.group.add(makeBlobShadow(0.8));
     scene.add(obj.group);
     dogs.push(obj);
   });

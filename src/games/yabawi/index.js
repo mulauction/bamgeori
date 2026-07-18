@@ -10,6 +10,7 @@ import { wait } from '../../ui/util.js';
 import { toast } from '../../ui/toast.js';
 import { create3D } from '../scene3d.js';
 import { makeVoxelPerson, box } from '../voxel.js';
+import { makeGlow, makeBlobShadow } from '../visuals.js';
 
 const CFG = CONFIG.yabawi;
 
@@ -49,6 +50,9 @@ function buildScene() {
   const lantern = new THREE.PointLight(0xffc266, 2.0, 16);
   lantern.position.set(0, 3.0, 1.6);
   scene.add(lantern);
+  const lanternGlow = makeGlow(0xffc266, 3.2);
+  lanternGlow.position.set(0, 2.9, 1.6);
+  scene.add(lanternGlow);
   const key = new THREE.DirectionalLight(0xfff0d0, 0.6);
   key.position.set(2, 5, 4);
   scene.add(key);
@@ -78,6 +82,7 @@ function buildScene() {
   // 주인 NPC (좌판 뒤)
   const keeper = makeVoxelPerson({ skin: 0xe6b58c, shirt: 0x5b3a2a, pants: 0x2b2136 });
   keeper.position.set(0, 0, -1.0);
+  keeper.add(makeBlobShadow(0.6));
   scene.add(keeper);
 
   // 컵 3개

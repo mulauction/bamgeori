@@ -5,6 +5,7 @@
 // ══════════════════════════════════════════════════════════════
 
 import * as THREE from 'three';
+import { makeGlow } from '../games/visuals.js';
 
 // 거리에 놓인 가게들. scene 값이 진입 시 열릴 화면 id.
 export const SHOPS = [
@@ -172,9 +173,15 @@ export function createScene(canvas) {
       );
       sign.position.set(0, 3.3, 1.71);
       g.add(sign);
+      const signGlow = makeGlow(s.color, 4);
+      signGlow.position.set(0, 3.3, 1.9);
+      g.add(signGlow);
       const lamp = new THREE.PointLight(0xffb347, 1.7, 12);
       lamp.position.set(0, 2.4, 1.2);
       g.add(lamp);
+      const lampGlow = makeGlow(0xffb347, 2.6);
+      lampGlow.position.set(0, 2.4, 1.2);
+      g.add(lampGlow);
       g.position.set(s.x, 0, -5.5);
       scene.add(g);
     } else {
@@ -197,6 +204,9 @@ export function createScene(canvas) {
       );
       sign.position.set(0, s.h - 0.8, 3.56);
       g.add(sign);
+      const signGlow = makeGlow(s.color, s.w * 0.9);
+      signGlow.position.set(0, s.h - 0.8, 3.8);
+      g.add(signGlow);
       const neon = new THREE.PointLight(new THREE.Color(s.color), 1.6, 13);
       neon.position.set(0, s.h - 0.8, 4.6);
       g.add(neon);
@@ -225,12 +235,18 @@ export function createScene(canvas) {
     const l = new THREE.PointLight(0xffd98a, 1.5, 11);
     l.position.set(x, 3.2, 1.0);
     scene.add(l);
+    const glow = makeGlow(0xffd98a, 2.2);
+    glow.position.set(x, 3.35, 1.0);
+    scene.add(glow);
   }
 
-  // 달
+  // 달 + 후광
   const moon = new THREE.Mesh(boxG(3, 3, 0.3), new THREE.MeshBasicMaterial({ color: 0xffe9b0 }));
   moon.position.set(40, 26, -40);
   scene.add(moon);
+  const moonGlow = makeGlow(0xffe9b0, 9);
+  moonGlow.position.set(40, 26, -39.5);
+  scene.add(moonGlow);
 
   function resize() {
     const wrap = document.getElementById('streetwrap');
