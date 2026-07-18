@@ -8,6 +8,11 @@ import { createScene, SHOPS } from './scene.js';
 import { createHero } from './character.js';
 import { createControls } from './controls.js';
 import { audio } from '../core/audio.js';
+import { store } from '../core/store.js';
+import { toast } from '../ui/toast.js';
+
+// 파산 시 유일하게 입장 가능한 가게(노동)
+const LABOR_SCENE = 'work-daeri';
 
 /**
  * @param {object} opts
@@ -28,8 +33,26 @@ export function createStreet({ onEnter }) {
   let nearShop = null;
   let active = true;
 
+  // 파산 상태 반영: 남루한 외형 + 느린 걸음 + 승부 가게 출입 금지
+  let bankrupt = store.isBankrupt();
+  hero.setShabby(bankrupt);
+  store.subscribe(() => {
+    bankrupt = store.isBankrupt();
+    hero.setShabby(bankrupt);
+  });
+
+  // 파산 중에는 노동(대리운전)만 입장 가능
+  function canEnter(shop) {
+    return !bankrupt || shop.scene === LABOR_SCENE;
+  }
+
   function tryEnter() {
-    if (active && nearShop) onEnter(nearShop.scene);
+    if (!active || !nearShop) return;
+    if (!canEnter(nearShop)) {
+      toast('빈털터리는 출입 금지 — 대리운전으로 재기하세요');
+      return;
+    }
+    onEnter(nearShop.scene);
   }
 
   const controls = createControls({ onEnter: tryEnter });
@@ -59,7 +82,7 @@ export function createStreet({ onEnter }) {
       const c = Math.cos(controls.cam.yaw);
       const mx = ix * c + iz * s;
       const mz = -ix * s + iz * c;
-      const spd = 0.0058 * dt;
+      const spd = 0.0058 * dt * (bankrupt ? 0.55 : 1); // 파산 시 걸음 처짐
       H.x = Math.max(-4, Math.min(108, H.x + mx * spd));
       H.z = Math.max(-4.0, Math.min(9.3, H.z + mz * spd));
       H.facing = Math.atan2(mx, mz);
@@ -110,7 +133,13 @@ export function createStreet({ onEnter }) {
     });
     if (nearShop) {
       enterBtn.style.display = 'block';
-      enterBtn.textContent = '🚪 ' + nearShop.name + ' 입장';
+      if (canEnter(nearShop)) {
+        enterBtn.textContent = '🚪 ' + nearShop.name + ' 입장';
+        enterBtn.classList.remove('blocked');
+      } else {
+        enterBtn.textContent = '🚫 빈털터리 출입 금지';
+        enterBtn.classList.add('blocked');
+      }
     } else {
       enterBtn.style.display = 'none';
     }

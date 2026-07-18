@@ -11,6 +11,7 @@ import { initHud } from './ui/hud.js';
 import { createStreet } from './street/index.js';
 import { mountGameScreen } from './ui/gameScreen.js';
 import { initBackButton } from './ui/backButton.js';
+import { initBankruptcy } from './ui/bankruptcy.js';
 
 // 게임 4종 (공통 인터페이스)
 import yabawi from './games/yabawi/index.js';
@@ -128,6 +129,7 @@ function initAudioControls() {
 store.init(); // 저장본 로드(포인트·자산·설정 복원)
 initHud();
 initAudioControls();
+initBankruptcy(); // 파산·재기 연출(화면 명도·훈장 토스트)
 const street = createStreet({ onEnter: openScreen });
 
 // 안드로이드 하드웨어 뒤로가기 → 씬 닫기(홈이면 앱 종료)

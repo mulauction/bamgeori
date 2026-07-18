@@ -4,7 +4,9 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
 html,body{min-height:100%}
-body{background:var(--bg);color:var(--paper);font-family:sans-serif;overflow-x:hidden}
+body{background:var(--bg);color:var(--paper);font-family:sans-serif;overflow-x:hidden;transition:filter .8s}
+/* 파산: 화면 명도·채도 저하(몰락의 가시화) */
+body.bankrupt{filter:brightness(.6) saturate(.5)}
 
 /* ── 상단바 ── */
 /* 노치/안전영역: 상단바는 상단 inset, 좌우 inset 반영 */
@@ -26,6 +28,7 @@ body{background:var(--bg);color:var(--paper);font-family:sans-serif;overflow-x:h
   background:var(--amber);color:#1a1206;border:none;border-radius:4px;
   box-shadow:0 4px 0 #8a6410;padding:12px 18px;font-weight:900;font-size:15px;display:none;cursor:pointer;z-index:5}
 #enterbtn:active{transform:translateX(-50%) translateY(3px);box-shadow:0 1px 0 #8a6410}
+#enterbtn.blocked{background:#6b2b30;color:#ffdede;box-shadow:0 4px 0 #3a1519}
 #stick{position:absolute;left:calc(16px + env(safe-area-inset-left));bottom:16px;width:112px;height:112px;border-radius:50%;
   background:rgba(23,19,38,.55);border:2px solid var(--line);z-index:5;touch-action:none}
 #knob{position:absolute;left:50%;top:50%;width:48px;height:48px;border-radius:50%;

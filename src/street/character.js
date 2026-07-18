@@ -88,5 +88,12 @@ export function createHero() {
     hero.rotation.y = facing;
   }
 
-  return { group: hero, applyPose };
+  // 파산 시 남루한 외형(어두운 텍스처 스왑) — armR/legR은 재질을 공유
+  const shabbyMats = [body.material, armL.material, legL.material];
+  const originalHex = shabbyMats.map((m) => m.color.getHex());
+  function setShabby(on) {
+    shabbyMats.forEach((m, i) => m.color.setHex(on ? 0x4a4652 : originalHex[i]));
+  }
+
+  return { group: hero, applyPose, setShabby };
 }
