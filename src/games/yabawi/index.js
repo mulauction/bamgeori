@@ -44,11 +44,12 @@ function placeInstant(cup) {
 function buildScene() {
   const { scene } = view;
 
-  scene.add(new THREE.AmbientLight(0x554f70, 1.0));
-  const lantern = new THREE.PointLight(0xffb347, 1.2, 14);
+  scene.add(new THREE.AmbientLight(0x6a6488, 1.5));
+  scene.add(new THREE.HemisphereLight(0xaab0e0, 0x2a2438, 0.7));
+  const lantern = new THREE.PointLight(0xffc266, 2.0, 16);
   lantern.position.set(0, 3.0, 1.6);
   scene.add(lantern);
-  const key = new THREE.DirectionalLight(0xfff0d0, 0.35);
+  const key = new THREE.DirectionalLight(0xfff0d0, 0.6);
   key.position.set(2, 5, 4);
   scene.add(key);
 

@@ -41,8 +41,9 @@ function weightedWinner() {
 
 function buildScene() {
   const { scene } = view;
-  scene.add(new THREE.AmbientLight(0x44506e, 1.0));
-  const key = new THREE.DirectionalLight(0xbcd0ff, 0.5);
+  scene.add(new THREE.AmbientLight(0x5a648a, 1.5));
+  scene.add(new THREE.HemisphereLight(0x9db4ff, 0x24302a, 0.8));
+  const key = new THREE.DirectionalLight(0xd6e2ff, 0.85);
   key.position.set(-6, 12, 8);
   scene.add(key);
 

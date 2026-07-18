@@ -41,8 +41,9 @@ function rollChicken() {
 
 function buildScene() {
   const { scene } = view;
-  scene.add(new THREE.AmbientLight(0x5a5060, 1.1));
-  const key = new THREE.DirectionalLight(0xfff0d8, 0.5);
+  scene.add(new THREE.AmbientLight(0x726578, 1.5));
+  scene.add(new THREE.HemisphereLight(0xd0c0b0, 0x2a2018, 0.8));
+  const key = new THREE.DirectionalLight(0xfff0d8, 0.85);
   key.position.set(3, 10, 6);
   scene.add(key);
 

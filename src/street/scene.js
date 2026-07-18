@@ -72,16 +72,20 @@ const mat = (c) => new THREE.MeshLambertMaterial({ color: c });
 export function createScene(canvas) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  // 필믹 톤매핑 — 밤거리 네온이 뭉개지지 않고 살아나게
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.25;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x0a0817);
-  scene.fog = new THREE.Fog(0x0a0817, 18, 60);
+  scene.background = new THREE.Color(0x14122a);
+  scene.fog = new THREE.Fog(0x14122a, 24, 70);
 
   const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 200);
 
-  // 조명
-  scene.add(new THREE.AmbientLight(0x33305c, 0.9));
-  const moonLight = new THREE.DirectionalLight(0x8fa0ff, 0.35);
+  // 조명 — 전체적으로 올려 가독성 확보(밤 분위기는 유지)
+  scene.add(new THREE.AmbientLight(0x5a5686, 1.35));
+  scene.add(new THREE.HemisphereLight(0x8a9ad0, 0x241f38, 0.7)); // 하늘/지면 반사광
+  const moonLight = new THREE.DirectionalLight(0xbcc8ff, 0.6);
   moonLight.position.set(-10, 30, 10);
   scene.add(moonLight);
 
@@ -168,7 +172,7 @@ export function createScene(canvas) {
       );
       sign.position.set(0, 3.3, 1.71);
       g.add(sign);
-      const lamp = new THREE.PointLight(0xffb347, 1.1, 9);
+      const lamp = new THREE.PointLight(0xffb347, 1.7, 12);
       lamp.position.set(0, 2.4, 1.2);
       g.add(lamp);
       g.position.set(s.x, 0, -5.5);
@@ -184,7 +188,7 @@ export function createScene(canvas) {
       const door = new THREE.Mesh(boxG(1.6, 2.4, 0.2), mat(0xf7d9a0));
       door.position.set(0, 1.2, 3.55);
       g.add(door);
-      const doorLight = new THREE.PointLight(0xffe0a0, 0.8, 6);
+      const doorLight = new THREE.PointLight(0xffe0a0, 1.3, 8);
       doorLight.position.set(0, 2.2, 4.2);
       g.add(doorLight);
       const sign = new THREE.Mesh(
@@ -193,7 +197,7 @@ export function createScene(canvas) {
       );
       sign.position.set(0, s.h - 0.8, 3.56);
       g.add(sign);
-      const neon = new THREE.PointLight(new THREE.Color(s.color), 1.0, 10);
+      const neon = new THREE.PointLight(new THREE.Color(s.color), 1.6, 13);
       neon.position.set(0, s.h - 0.8, 4.6);
       g.add(neon);
       g.position.set(s.x, 0, -6.5);
@@ -218,7 +222,7 @@ export function createScene(canvas) {
     const head = new THREE.Mesh(boxG(0.5, 0.3, 0.5), mat(0xffe9b0));
     head.position.set(x, 3.4, 1.0);
     scene.add(head);
-    const l = new THREE.PointLight(0xffd98a, 0.9, 8);
+    const l = new THREE.PointLight(0xffd98a, 1.5, 11);
     l.position.set(x, 3.2, 1.0);
     scene.add(l);
   }

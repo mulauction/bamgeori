@@ -43,8 +43,10 @@ export function create3D(container, opts = {}) {
   wrap.appendChild(canvas);
   container.appendChild(wrap);
 
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.25;
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(bg);

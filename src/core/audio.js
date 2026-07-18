@@ -18,7 +18,7 @@ function ensure() {
     if (!AC) return null;
     ctx = new AC();
     master = ctx.createGain();
-    master.gain.value = muted ? 0 : 0.45;
+    master.gain.value = muted ? 0 : 0.85;
     master.connect(ctx.destination);
   } catch {
     ctx = null;
@@ -96,7 +96,7 @@ const ONESHOT = {
     ONESHOT.fanfare();
   },
   footstep() {
-    noise(ctx.currentTime, 0.08, { gain: 0.08, freq: 500, type: 'lowpass' });
+    noise(ctx.currentTime, 0.09, { gain: 0.18, freq: 420, type: 'lowpass' });
   },
 };
 
@@ -108,7 +108,7 @@ function startAmbience() {
   const hg = ctx.createGain();
   hum.type = 'sawtooth';
   hum.frequency.value = 55;
-  hg.gain.value = 0.03;
+  hg.gain.value = 0.05;
   const lp = ctx.createBiquadFilter();
   lp.type = 'lowpass';
   lp.frequency.value = 200;
@@ -163,6 +163,7 @@ export const audio = {
 
   play(name) {
     if (!ctx || muted || !unlocked) return;
+    if (ctx.state === 'suspended') ctx.resume(); // 방어적 재개(웹뷰 절전 복귀 등)
     ONESHOT[name]?.();
   },
 
