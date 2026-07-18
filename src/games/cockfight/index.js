@@ -1,42 +1,34 @@
 // ══════════════════════════════════════════════════════════════
-//  닭싸움 — 능력치 공개, 결과는 실제 확률 (2층: 관전·베팅형)
-//  능력치 범위·데미지 계수·배수는 economy.CONFIG.cockfight 에서.
-//  start는 {win, multiplier} 반환. 정산은 economy가 처리.
+//  닭싸움 (3D) — 흙바닥 원형 링 + 구경꾼 복셀 NPC. 복셀 닭 2마리가
+//  돌진·점프·타격, 타격 시 깃털 파티클 + 카메라 흔들림.
+//  능력치 공개·결과는 실제 확률. 전투 시뮬레이션 로직은 2D판과 동일.
 // ══════════════════════════════════════════════════════════════
 
+import * as THREE from 'three';
 import { CONFIG } from '../../core/economy.js';
 import { wait } from '../../ui/util.js';
 import { toast } from '../../ui/toast.js';
-import { drawSprite } from '../sprite.js';
+import { create3D } from '../scene3d.js';
+import { makeVoxelChicken, makeCrowd, box } from '../voxel.js';
 
 const CFG = CONFIG.cockfight;
+const REST = { blue: -2.0, red: 2.0 };
 
-const CHK = [
-  '....RR......',
-  '...RRRR.....',
-  '..KWWWWK....',
-  '.KWWWWWWKOO.',
-  '.KWEWWWWK...',
-  '.KWWWWWWK...',
-  '.KWWWWWWK...',
-  '..KWWWWK....',
-  '...KWWK.....',
-  '....KK......',
-  '....LL......',
-  '...LL.LL....',
-];
+let view = null;
+let chickens = { blue: null, red: null };
+let target = { blue: -2.0, red: 2.0 };
+let jumpY = { blue: 0, red: 0 };
+let jumpV = { blue: 0, red: 0 };
+let phase = { blue: 0, red: 0 };
+let particles = [];
+let shake = 0;
 
-let cv = null;
-let ctx2d = null;
 let pickBox = null;
-let hpBlueEl = null;
-let hpRedEl = null;
-let nmBlueEl = null;
-let nmRedEl = null;
-
+let hpEl = { blue: null, red: null };
+let nmEl = { blue: null, red: null };
 let blue = null;
 let red = null;
-let pick = ''; // 'blue' | 'red'
+let pick = '';
 let busy = false;
 
 function rollChicken() {
@@ -47,28 +39,116 @@ function rollChicken() {
   };
 }
 
-function drawFrame(off) {
-  off = off || {};
-  const g = ctx2d;
-  g.fillStyle = '#171326';
-  g.fillRect(0, 0, 360, 132);
-  g.fillStyle = '#3d2c1c';
-  g.fillRect(0, 104, 360, 28);
-  g.fillStyle = '#54402a';
-  g.fillRect(0, 104, 360, 4);
-  g.fillStyle = '#100d1f';
-  for (let i = 0; i < 12; i++) {
-    g.fillRect(i * 32 + 6, 20 + (i % 2) * 6, 20, 26);
-    g.fillRect(i * 32 + 11, 10 + (i % 2) * 6, 10, 10);
+function buildScene() {
+  const { scene } = view;
+  scene.add(new THREE.AmbientLight(0x5a5060, 1.1));
+  const key = new THREE.DirectionalLight(0xfff0d8, 0.5);
+  key.position.set(3, 10, 6);
+  scene.add(key);
+
+  // 흙바닥 원형 링
+  const ring = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 4.5, 0.3, 20), new THREE.MeshLambertMaterial({ color: 0x5a4230 }));
+  ring.position.y = -0.15;
+  scene.add(ring);
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(4.5, 0.12, 6, 24), new THREE.MeshLambertMaterial({ color: 0x3a2c1c }));
+  rim.rotation.x = Math.PI / 2;
+  rim.position.y = 0.02;
+  scene.add(rim);
+
+  // 구경꾼 8명 (원형 배치, InstancedMesh)
+  const crowd = [];
+  for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * Math.PI * 2;
+    crowd.push({ x: Math.cos(a) * 5.4, z: Math.sin(a) * 5.4 - 0.5, ry: -a });
   }
-  const palB = { K: '#12101c', W: '#e8f4ff', R: '#ff5964', O: '#ffc247', L: '#ffc247', E: '#12101c' };
-  const palR = { K: '#12101c', W: '#d8a05c', R: '#ff5964', O: '#ffc247', L: '#ffc247', E: '#12101c' };
-  drawSprite(g, CHK, palB, 60 + (off.blue || 0), 68, 3, false);
-  drawSprite(g, CHK, palR, 254 + (off.red || 0), 68, 3, true);
-  if (off.spark) {
-    g.fillStyle = '#ffc247';
-    for (let i = 0; i < 6; i++) g.fillRect(off.spark + Math.random() * 30 - 15, 80 + Math.random() * 24, 3, 3);
+  scene.add(makeCrowd(crowd, { bodyColor: 0x2a2440, headColor: 0x3a3050 }));
+
+  // 닭 2마리 (고정 색, 서로 마주봄)
+  const b = makeVoxelChicken(0xe8f4ff);
+  b.group.position.set(REST.blue, 0, 0);
+  b.group.rotation.y = 0; // +x(중앙) 바라봄
+  scene.add(b.group);
+  const r = makeVoxelChicken(0xd8a05c);
+  r.group.position.set(REST.red, 0, 0);
+  r.group.rotation.y = Math.PI; // -x(중앙) 바라봄
+  scene.add(r.group);
+  chickens = { blue: b, red: r };
+
+  // 깃털 파티클 풀
+  particles = [];
+  const featherGeo = new THREE.BoxGeometry(0.12, 0.12, 0.03);
+  for (let i = 0; i < 30; i++) {
+    const m = new THREE.Mesh(featherGeo, new THREE.MeshLambertMaterial({ color: 0xf2ead8 }));
+    m.visible = false;
+    scene.add(m);
+    particles.push({ mesh: m, vel: new THREE.Vector3(), life: 0 });
   }
+}
+
+function spawnFeathers(x, y, z) {
+  let n = 0;
+  for (const p of particles) {
+    if (p.life > 0) continue;
+    p.mesh.position.set(x + (Math.random() - 0.5) * 0.4, y + Math.random() * 0.4, z + (Math.random() - 0.5) * 0.4);
+    p.vel.set((Math.random() - 0.5) * 2.4, 1.5 + Math.random() * 2.2, (Math.random() - 0.5) * 2.4);
+    p.life = 700 + Math.random() * 400;
+    p.mesh.visible = true;
+    if (++n >= 10) break;
+  }
+}
+
+function onFrame(_t, dt) {
+  const dts = dt / 1000;
+  for (const side of ['blue', 'red']) {
+    const g = chickens[side].group;
+    g.position.x += (target[side] - g.position.x) * Math.min(1, dt * 0.02);
+    // 점프 물리
+    jumpV[side] -= 22 * dts;
+    jumpY[side] += jumpV[side] * dts;
+    if (jumpY[side] < 0) {
+      jumpY[side] = 0;
+      jumpV[side] = 0;
+    }
+    g.position.y = jumpY[side];
+    phase[side] += dt * 0.02 * (busy ? 1 : 0.3);
+    chickens[side].animate(phase[side]);
+  }
+  // 파티클
+  for (const p of particles) {
+    if (p.life <= 0) continue;
+    p.vel.y -= 9 * dts;
+    p.mesh.position.addScaledVector(p.vel, dts);
+    p.mesh.rotation.x += dt * 0.01;
+    p.life -= dt;
+    if (p.life <= 0) p.mesh.visible = false;
+  }
+  // 카메라 흔들림
+  let ox = 0;
+  let oy = 0;
+  if (shake > 0) {
+    ox = (Math.random() - 0.5) * 0.25 * (shake / 300);
+    oy = (Math.random() - 0.5) * 0.25 * (shake / 300);
+    shake -= dt;
+  }
+  view.camera.position.set(ox, 3.6 + oy, 6.2);
+  view.camera.lookAt(0, 0.9, 0);
+}
+
+function buildHud(container) {
+  const bars = document.createElement('div');
+  bars.className = 'hpbars';
+  bars.innerHTML =
+    '<div class="hpcol b"><div class="nm"></div><div class="hpbar"><div class="hp" style="width:100%"></div></div></div>' +
+    '<div class="hpcol r"><div class="nm"></div><div class="hpbar"><div class="hp" style="width:100%"></div></div></div>';
+  container.appendChild(bars);
+  nmEl.blue = bars.querySelector('.hpcol.b .nm');
+  nmEl.red = bars.querySelector('.hpcol.r .nm');
+  hpEl.blue = bars.querySelector('.hpcol.b .hp');
+  hpEl.red = bars.querySelector('.hpcol.r .hp');
+
+  pickBox = document.createElement('div');
+  pickBox.className = 'pick2';
+  container.appendChild(pickBox);
 }
 
 function buildPicks() {
@@ -97,12 +177,26 @@ function rollMatch() {
   while (red.name === blue.name) red = rollChicken();
   blue.cur = blue.hp;
   red.cur = red.hp;
-  nmBlueEl.textContent = '🟦 ' + blue.name + ' (공' + blue.atk + '/체' + blue.hp + ')';
-  nmRedEl.textContent = '(공' + red.atk + '/체' + red.hp + ') ' + red.name + ' 🟥';
-  hpBlueEl.style.width = '100%';
-  hpRedEl.style.width = '100%';
+  nmEl.blue.textContent = '🟦 ' + blue.name + ' (공' + blue.atk + '/체' + blue.hp + ')';
+  nmEl.red.textContent = '(공' + red.atk + '/체' + red.hp + ') ' + red.name + ' 🟥';
+  hpEl.blue.style.width = '100%';
+  hpEl.red.style.width = '100%';
   buildPicks();
-  drawFrame();
+}
+
+async function lunge(side) {
+  const dir = side === 'blue' ? 1 : -1;
+  target[side] = REST[side] + dir * 1.5;
+  jumpV[side] = 6; // 돌진 점프
+  await wait(150);
+  // 타격 순간: 상대 위치에 깃털 + 흔들림
+  const defSide = side === 'blue' ? 'red' : 'blue';
+  const dx = chickens[defSide].group.position.x;
+  spawnFeathers(dx, 0.9, 0);
+  shake = 300;
+  await wait(130);
+  target[side] = REST[side]; // 복귀
+  await wait(200);
 }
 
 export default {
@@ -114,29 +208,13 @@ export default {
   kind: 'wager',
 
   mount(container /* , ctx */) {
-    pickBox = document.createElement('div');
-    pickBox.className = 'pick2';
-    container.appendChild(pickBox);
-
-    const bars = document.createElement('div');
-    bars.className = 'hpbars';
-    bars.innerHTML =
-      '<div class="hpcol b"><div class="nm"></div><div class="hpbar"><div class="hp" style="width:100%"></div></div></div>' +
-      '<div class="hpcol r"><div class="nm"></div><div class="hpbar"><div class="hp" style="width:100%"></div></div></div>';
-    container.appendChild(bars);
-    nmBlueEl = bars.querySelector('.hpcol.b .nm');
-    nmRedEl = bars.querySelector('.hpcol.r .nm');
-    hpBlueEl = bars.querySelector('.hpcol.b .hp');
-    hpRedEl = bars.querySelector('.hpcol.r .hp');
-
-    cv = document.createElement('canvas');
-    cv.className = 'gamecv';
-    cv.width = 360;
-    cv.height = 132;
-    container.appendChild(cv);
-    ctx2d = cv.getContext('2d');
-
+    buildHud(container);
+    view = create3D(container, { height: 260, fov: 55, bg: 0x141019 });
+    view.camera.position.set(0, 3.6, 6.2);
+    view.camera.lookAt(0, 0.9, 0);
+    buildScene();
     rollMatch();
+    view.start(onFrame);
   },
 
   isReady() {
@@ -145,6 +223,11 @@ export default {
 
   reset() {
     busy = false;
+    target = { blue: REST.blue, red: REST.red };
+    jumpY = { blue: 0, red: 0 };
+    jumpV = { blue: 0, red: 0 };
+    if (chickens.blue) chickens.blue.group.position.set(REST.blue, 0, 0);
+    if (chickens.red) chickens.red.group.position.set(REST.red, 0, 0);
     rollMatch();
   },
 
@@ -157,22 +240,9 @@ export default {
       const defSide = turn === 'blue' ? 'red' : 'blue';
       const dmg = Math.floor(sides[atkSide].atk * (CFG.dmgFactor.base + Math.random() * CFG.dmgFactor.span));
       sides[defSide].cur = Math.max(0, sides[defSide].cur - dmg);
-      const dir = atkSide === 'blue' ? 1 : -1;
-      for (let step = 0; step <= 3; step++) {
-        const o = {};
-        o[atkSide] = dir * step * 22;
-        drawFrame(o);
-        await wait(35);
-      }
-      const o2 = {};
-      o2[atkSide] = dir * 66;
-      o2.spark = atkSide === 'blue' ? 200 : 150;
-      drawFrame(o2);
-      (defSide === 'blue' ? hpBlueEl : hpRedEl).style.width =
-        (sides[defSide].cur / sides[defSide].hp) * 100 + '%';
-      await wait(160);
-      drawFrame();
-      await wait(260);
+      await lunge(atkSide);
+      hpEl[defSide].style.width = (sides[defSide].cur / sides[defSide].hp) * 100 + '%';
+      await wait(200);
       turn = defSide;
     }
     const winSide = blue.cur > 0 ? 'blue' : 'red';
@@ -183,11 +253,14 @@ export default {
   },
 
   unmount() {
-    if (pickBox) pickBox.innerHTML = '';
-    cv = null;
-    ctx2d = null;
+    if (view) view.dispose();
+    if (pickBox) pickBox.remove();
+    const bars = document.querySelector('#screen .hpbars');
+    if (bars) bars.remove();
+    view = null;
+    chickens = { blue: null, red: null };
+    particles = [];
     pickBox = null;
-    hpBlueEl = hpRedEl = nmBlueEl = nmRedEl = null;
     blue = red = null;
     pick = '';
     busy = false;
