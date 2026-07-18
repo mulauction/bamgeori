@@ -65,6 +65,7 @@ function signTex(text, color) {
 
 const boxG = (w, h, d) => new THREE.BoxGeometry(w, h, d);
 const mat = (c) => new THREE.MeshLambertMaterial({ color: c });
+const box = (w, h, d, c) => new THREE.Mesh(boxG(w, h, d), mat(c));
 
 /**
  * 거리 씬을 만든다.
