@@ -25,7 +25,8 @@ export function createStreet({ onEnter }) {
   const canvas = document.getElementById('gl');
   const enterBtn = document.getElementById('enterbtn');
 
-  const { renderer, scene, camera, resize } = createScene(canvas);
+  const { renderer, scene, camera, resize, setDayNight } = createScene(canvas);
+  setDayNight(store.isDay()); // 저장된 낮/밤 설정 적용
   const hero = createHero();
   scene.add(hero.group);
 
@@ -218,5 +219,6 @@ export function createStreet({ onEnter }) {
       else resize(); // 홈 복귀 시 컨테이너 크기 재적용
     },
     resize,
+    setDayNight,
   };
 }

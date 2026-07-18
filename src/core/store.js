@@ -55,7 +55,7 @@ function makeDefaultStats() {
 }
 
 function makeDefaultMeta() {
-  return { muted: false };
+  return { muted: false, day: false };
 }
 
 function createStore(adapter) {
@@ -130,6 +130,14 @@ function createStore(adapter) {
     },
     setMuted(v) {
       state.meta.muted = !!v;
+      persist();
+      emit();
+    },
+    isDay() {
+      return !!state.meta.day;
+    },
+    setDay(v) {
+      state.meta.day = !!v;
       persist();
       emit();
     },

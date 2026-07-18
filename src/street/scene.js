@@ -84,8 +84,10 @@ export function createScene(canvas) {
   const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 200);
 
   // 조명 — 전체적으로 올려 가독성 확보(밤 분위기는 유지)
-  scene.add(new THREE.AmbientLight(0x5a5686, 1.35));
-  scene.add(new THREE.HemisphereLight(0x8a9ad0, 0x241f38, 0.7)); // 하늘/지면 반사광
+  const ambient = new THREE.AmbientLight(0x5a5686, 1.35);
+  scene.add(ambient);
+  const hemi = new THREE.HemisphereLight(0x8a9ad0, 0x241f38, 0.7); // 하늘/지면 반사광
+  scene.add(hemi);
   const moonLight = new THREE.DirectionalLight(0xbcc8ff, 0.6);
   moonLight.position.set(-10, 30, 10);
   scene.add(moonLight);
@@ -248,6 +250,39 @@ export function createScene(canvas) {
   moonGlow.position.set(40, 26, -39.5);
   scene.add(moonGlow);
 
+  // ── 낮/밤 전환 ──
+  function setDayNight(day) {
+    if (day) {
+      scene.background.set(0x8fb8e8);
+      scene.fog.color.set(0x8fb8e8);
+      scene.fog.near = 40;
+      scene.fog.far = 110;
+      ambient.color.set(0xfff2d8);
+      ambient.intensity = 1.9;
+      hemi.color.set(0xaaccff);
+      hemi.groundColor.set(0x6a7a5a);
+      hemi.intensity = 1.0;
+      moonLight.color.set(0xfff0d0);
+      moonLight.intensity = 1.2;
+      moon.material.color.set(0xfff6c0); // 해
+      moonGlow.material.color.set(0xfff2b0);
+    } else {
+      scene.background.set(0x14122a);
+      scene.fog.color.set(0x14122a);
+      scene.fog.near = 24;
+      scene.fog.far = 70;
+      ambient.color.set(0x5a5686);
+      ambient.intensity = 1.35;
+      hemi.color.set(0x8a9ad0);
+      hemi.groundColor.set(0x241f38);
+      hemi.intensity = 0.7;
+      moonLight.color.set(0xbcc8ff);
+      moonLight.intensity = 0.6;
+      moon.material.color.set(0xffe9b0); // 달
+      moonGlow.material.color.set(0xffe9b0);
+    }
+  }
+
   function resize() {
     const wrap = document.getElementById('streetwrap');
     const w = wrap.clientWidth;
@@ -257,5 +292,5 @@ export function createScene(canvas) {
     camera.updateProjectionMatrix();
   }
 
-  return { renderer, scene, camera, resize };
+  return { renderer, scene, camera, resize, setDayNight };
 }
