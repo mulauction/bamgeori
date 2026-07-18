@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>밤거리 승부 — 3D 복셀 에디션</title>
+</head>
+<body>
+  <!-- 상단바: 로고 + 지갑(포인트) -->
+  <div id="topbar">
+    <div class="logo">밤거리 승부 · 3D</div>
+    <div id="wallet">10,000<small> P</small></div>
+  </div>
+
+  <!-- 홈: 3D 거리 + 내 자산 -->
+  <div id="home">
+    <div id="streetwrap">
+      <canvas id="gl"></canvas>
+      <div id="hint">왼손 조이스틱 이동 · 화면 드래그로 시점 회전 · 오른손 점프</div>
+      <button id="enterbtn"></button>
+      <div id="stick"><div id="knob"></div></div>
+      <button id="jump">점프</button>
+    </div>
+    <div id="assets">
+      <h2>내 자산</h2>
+      <div id="garage"><span class="empty">아직 빈손입니다. 골목은 깁니다.</span></div>
+    </div>
+  </div>
+
+  <!-- 게임/상점 화면이 동적으로 마운트되는 지점 -->
+  <div id="screen"></div>
+
+  <!-- 토스트 -->
+  <div id="toast"></div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
