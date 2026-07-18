@@ -6,6 +6,9 @@
 /** 시작 자금 */
 export const START_POINTS = 10000;
 
+/** 재기 임계치 — 파산 후 노동으로 이 금액에 도달하면 '재기'로 간주 */
+export const COMEBACK_THRESHOLD = 5000;
+
 /** 베팅 칩 프리셋 (마지막 '올인'은 UI에서 보유 전액으로 치환) */
 export const CHIP_VALUES = [500, 1000, 5000, 10000, '올인'];
 export const DEFAULT_BET = 1000;
@@ -83,21 +86,24 @@ export function takeBet(store, bet) {
 
 /**
  * 승부 정산. 승리 시 판돈 × 배수를 지급(판돈은 takeBet에서 이미 차감됨).
+ * 정산 직후 통계 기록 훅(store.recordWager)을 호출한다 — 기록의 유일한 진입점.
  * @returns {number} 획득 포인트(패배 시 0)
  */
-export function settleWager(store, { win, bet, multiplier }) {
-  if (!win) return 0;
-  const gain = Math.floor(bet * multiplier);
-  store.addPoints(gain);
+export function settleWager(store, { win, bet, multiplier, gameId }) {
+  const gain = win ? Math.floor(bet * multiplier) : 0;
+  if (gain > 0) store.addPoints(gain);
+  store.recordWager({ gameId, win: !!win, bet, gain, multiplier });
   return gain;
 }
 
 /**
  * 노동(재기) 정산. 성공/지각에 따른 고정 보상.
+ * 정산 직후 통계 기록 훅(store.recordLabor)을 호출한다.
  * @returns {number} 획득 포인트
  */
 export function settleLabor(store, success) {
   const gain = success ? CONFIG.work.rewardSuccess : CONFIG.work.rewardLate;
   store.addPoints(gain);
+  store.recordLabor({ gain });
   return gain;
 }

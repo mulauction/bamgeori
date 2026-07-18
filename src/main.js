@@ -105,3 +105,13 @@ initBackButton({
   isSceneOpen: () => current !== null,
   closeScene: closeScreen,
 });
+
+// 디버그 콘솔 핸들 (UI 없음) — 통계/상태 확인 및 초기화용
+// 사용 예: __bamgeori.stats() / __bamgeori.reset()
+window.__bamgeori = {
+  stats: () => store.getStats(),
+  isBankrupt: () => store.isBankrupt(),
+  points: () => store.getPoints(),
+  assets: () => store.getAssets(),
+  reset: () => store.reset(),
+};

@@ -108,7 +108,7 @@ export function mountGameScreen(container, game, onBack) {
       go.disabled = true;
       const { win, multiplier } = await game.start(bet);
       if (!alive) return;
-      const gain = settleWager(store, { win, bet, multiplier });
+      const gain = settleWager(store, { win, bet, multiplier, gameId: game.id });
       showWager(win, gain, bet, multiplier);
       go.disabled = false;
       game.reset?.();
