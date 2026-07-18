@@ -119,11 +119,11 @@ function makeSport(color) {
   return g;
 }
 
-// 탈것 주차 위치(거리 near side)
+// 탈것 주차 위치(거리 near side) + 이름
 const PARK = {
-  bike: { x: 18, build: () => makeBike() },
-  car: { x: 44, build: () => makeCar(0x3a6ea5) },
-  sport: { x: 68, build: () => makeSport(0xff5964) },
+  bike: { x: 18, name: '자전거', build: () => makeBike() },
+  car: { x: 44, name: '중고차', build: () => makeCar(0x3a6ea5) },
+  sport: { x: 68, name: '스포츠카', build: () => makeSport(0xff5964) },
 };
 // 금목걸이는 자산(부동산 등급) 보유 시 표시
 const NECKLACE_ITEMS = ['apt', 'bld', 'statue'];
@@ -189,5 +189,10 @@ export function createLiveliness(scene, hero, count = 6) {
     }
   }
 
-  return { update };
+  return {
+    update,
+    vehicles, // { id: group } — 보유해 거리에 나타난 탈것
+    parkZ: 2.6,
+    meta: PARK, // 이름·주차 위치
+  };
 }

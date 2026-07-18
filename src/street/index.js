@@ -52,17 +52,52 @@ export function createStreet({ onEnter }) {
     return !bankrupt || shop.scene === LABOR_SCENE;
   }
 
-  function tryEnter() {
-    if (!active || !nearShop) return;
-    if (!canEnter(nearShop)) {
-      toast('빈털터리는 출입 금지 — 대리운전으로 재기하세요');
-      return;
+  // 탈것 타기 상태
+  let riding = null; // { id, group }
+  let nearVeh = null;
+
+  function findNearVehicle() {
+    for (const id of Object.keys(life.vehicles)) {
+      const g = life.vehicles[id];
+      if (!g) continue;
+      if (Math.abs(H.x - g.position.x) < 3 && H.z > 0.5 && H.z < 4.5) return { id, group: g };
     }
-    onEnter(nearShop.scene);
+    return null;
   }
 
-  const controls = createControls({ onEnter: tryEnter });
-  enterBtn.onclick = tryEnter;
+  function mountVehicle(v) {
+    riding = v;
+    toast('🚲 ' + life.meta[v.id].name + ' 탑승! (버튼으로 내리기)');
+  }
+  function dismount() {
+    if (!riding) return;
+    // 현재 위치에 주차
+    riding.group.position.set(H.x, 0, life.parkZ);
+    riding.group.rotation.y = Math.PI / 2;
+    toast('🚲 ' + life.meta[riding.id].name + '에서 내렸다');
+    riding = null;
+  }
+
+  // 입장 버튼 = 문맥 액션(타기/내리기/입장)
+  function primaryAction() {
+    if (riding) {
+      dismount();
+      return;
+    }
+    if (!active) return;
+    if (nearShop) {
+      if (!canEnter(nearShop)) {
+        toast('빈털터리는 출입 금지 — 대리운전으로 재기하세요');
+        return;
+      }
+      onEnter(nearShop.scene);
+      return;
+    }
+    if (nearVeh) mountVehicle(nearVeh);
+  }
+
+  const controls = createControls({ onEnter: primaryAction });
+  enterBtn.onclick = primaryAction;
 
   window.addEventListener('resize', resize);
 
@@ -91,7 +126,7 @@ export function createStreet({ onEnter }) {
       const c = Math.cos(controls.cam.yaw);
       const mx = ix * c + iz * s;
       const mz = -ix * s + iz * c;
-      const spd = 0.0058 * dt * (bankrupt ? 0.55 : 1); // 파산 시 걸음 처짐
+      const spd = 0.0058 * dt * (bankrupt ? 0.55 : 1) * (riding ? 1.9 : 1); // 파산 처짐 / 탈것 가속
       H.x = Math.max(-4, Math.min(108, H.x + mx * spd));
       H.z = Math.max(-4.0, Math.min(9.3, H.z + mz * spd));
       H.facing = Math.atan2(mx, mz);
@@ -122,6 +157,13 @@ export function createStreet({ onEnter }) {
 
     hero.applyPose({ x: H.x, y: H.y, z: H.z, facing: H.facing, phase: H.phase, moving });
 
+    // 탈것 탑승: 히어로를 살짝 올리고 탈것을 발밑으로 이동
+    if (riding) {
+      hero.group.position.y += 0.35;
+      riding.group.position.set(H.x, 0, H.z);
+      riding.group.rotation.y = H.facing;
+    }
+
     // 궤도 카메라
     const cp = Math.cos(controls.cam.pitch);
     const sp = Math.sin(controls.cam.pitch);
@@ -135,12 +177,18 @@ export function createStreet({ onEnter }) {
     );
     camera.lookAt(tx, ty, tz);
 
-    // 근접 상점 감지
+    // 근접 상점/탈것 감지 → 문맥 버튼
     nearShop = null;
     SHOPS.forEach((sh) => {
       if (Math.abs(H.x - sh.x) < 3.4 && H.z < 1.2) nearShop = sh;
     });
-    if (nearShop) {
+    nearVeh = riding ? null : findNearVehicle();
+
+    if (riding) {
+      enterBtn.style.display = 'block';
+      enterBtn.textContent = '🚲 내리기';
+      enterBtn.classList.remove('blocked');
+    } else if (nearShop) {
       enterBtn.style.display = 'block';
       if (canEnter(nearShop)) {
         enterBtn.textContent = '🚪 ' + nearShop.name + ' 입장';
@@ -149,6 +197,10 @@ export function createStreet({ onEnter }) {
         enterBtn.textContent = '🚫 빈털터리 출입 금지';
         enterBtn.classList.add('blocked');
       }
+    } else if (nearVeh) {
+      enterBtn.style.display = 'block';
+      enterBtn.textContent = '🚲 ' + life.meta[nearVeh.id].name + ' 타기';
+      enterBtn.classList.remove('blocked');
     } else {
       enterBtn.style.display = 'none';
     }
