@@ -10,6 +10,8 @@ import { createControls } from './controls.js';
 import { audio } from '../core/audio.js';
 import { store } from '../core/store.js';
 import { toast } from '../ui/toast.js';
+import { createLiveliness } from './liveliness.js';
+import { initMarquee } from '../ui/marqueeBanner.js';
 
 // 파산 시 유일하게 입장 가능한 가게(노동)
 const LABOR_SCENE = 'work-daeri';
@@ -26,6 +28,10 @@ export function createStreet({ onEnter }) {
   const { renderer, scene, camera, resize } = createScene(canvas);
   const hero = createHero();
   scene.add(hero.group);
+
+  // 거리 생동감(행인·과시템) + 전광판
+  const life = createLiveliness(scene, hero);
+  const marqueeCtl = initMarquee();
 
   // 히어로 상태
   const H = { x: 2, z: -1.5, y: 0, vy: 0, phase: 0, facing: Math.PI / 2 };
@@ -67,6 +73,9 @@ export function createStreet({ onEnter }) {
     if (!active) return;
     const dt = Math.min(40, t - prevT);
     prevT = t;
+
+    life.update(dt); // 행인 배회
+    marqueeCtl.pump(); // 전광판 문구 흐름
 
     // 이동 입력 (조이스틱 + 키보드), 길이 정규화
     let { ix, iz } = controls.getMoveInput();

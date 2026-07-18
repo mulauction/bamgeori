@@ -74,6 +74,16 @@ export function createHero() {
   legR.position.x = 0.2;
   hero.add(legR);
 
+  // 금목걸이(과시템 보유 시 표시) — 목 높이 금색 링
+  const necklace = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.06, 6, 12), new THREE.MeshLambertMaterial({ color: 0xffc247 }));
+  necklace.rotation.x = Math.PI / 2;
+  necklace.position.y = 1.72;
+  necklace.visible = false;
+  hero.add(necklace);
+  function setNecklace(on) {
+    necklace.visible = !!on;
+  }
+
   hero.position.set(2, 0, -1.5);
 
   // 걷기 애니메이션 + 위치 적용
@@ -95,5 +105,5 @@ export function createHero() {
     shabbyMats.forEach((m, i) => m.color.setHex(on ? 0x4a4652 : originalHex[i]));
   }
 
-  return { group: hero, applyPose, setShabby };
+  return { group: hero, applyPose, setShabby, setNecklace };
 }

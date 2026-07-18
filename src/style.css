@@ -24,6 +24,15 @@ body.bankrupt{filter:brightness(.6) saturate(.5)}
 #streetwrap{position:relative;height:62vh;min-height:340px}
 #gl{width:100%;height:100%;display:block}
 #hint{position:absolute;top:8px;left:0;right:0;text-align:center;font-size:11px;color:var(--dim);pointer-events:none;text-shadow:0 1px 3px #000}
+
+/* 거리 상단 전광판 */
+#marquee{position:absolute;top:0;left:0;right:0;height:26px;background:rgba(10,8,20,.88);
+  border-bottom:2px solid var(--amber);overflow:hidden;display:none;z-index:6}
+#marquee.on{display:block}
+#marquee span{position:absolute;white-space:nowrap;font-weight:900;color:var(--amber);
+  font-size:14px;line-height:26px;left:0;will-change:transform;
+  text-shadow:0 0 8px rgba(255,194,71,.6);animation:marquee-scroll 8s linear}
+@keyframes marquee-scroll{from{transform:translateX(100vw)}to{transform:translateX(-100%)}}
 #enterbtn{position:absolute;left:50%;transform:translateX(-50%);bottom:76px;
   background:var(--amber);color:#1a1206;border:none;border-radius:4px;
   box-shadow:0 4px 0 #8a6410;padding:12px 18px;font-weight:900;font-size:15px;display:none;cursor:pointer;z-index:5}
