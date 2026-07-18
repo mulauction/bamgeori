@@ -160,7 +160,7 @@ export function createLiveliness(scene, hero, count = 6) {
   for (let i = 0; i < count; i++) {
     const w = makeWalker(SHIRTS[i % SHIRTS.length]);
     const x = 6 + Math.random() * 92;
-    const z = -1 + Math.random() * 3.5;
+    const z = -3 + Math.random() * 15; // 넓어진 거리 전체에 분포
     w.group.position.set(x, 0, z);
     scene.add(w.group);
     walkers.push({ ...w, x, z, dir: Math.random() < 0.5 ? 1 : -1, speed: 0.0009 + Math.random() * 0.0011, phase: 0, state: 'walk', timer: 0 });

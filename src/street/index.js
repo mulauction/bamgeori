@@ -138,7 +138,10 @@ export function createStreet({ onEnter }) {
       const mz = -ix * s + iz * c;
       const spd = 0.0058 * dt * (bankrupt ? 0.55 : 1) * (riding ? 1.9 : 1); // 파산 처짐 / 탈것 가속
       H.x = Math.max(-4, Math.min(108, H.x + mx * spd));
-      H.z = Math.max(-4.0, Math.min(9.3, H.z + mz * spd));
+      // 세로 이동: 기본은 넓은 거리, x≈40 골목에서는 뒤쪽으로 더 깊이
+      const inAlley = Math.abs(H.x - 40) < 2.6;
+      const zMin = inAlley ? -24 : -3.8;
+      H.z = Math.max(zMin, Math.min(13.5, H.z + mz * spd));
       H.facing = Math.atan2(mx, mz);
       H.phase += dt * 0.012;
     } else {

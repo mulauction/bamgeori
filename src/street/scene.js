@@ -242,6 +242,52 @@ export function createScene(canvas) {
     scene.add(glow);
   }
 
+  // ── near-side 광장(세로 이동 공간 확장) ──
+  const plaza = new THREE.Mesh(new THREE.PlaneGeometry(220, 13), new THREE.MeshLambertMaterial({ map: walkTex }));
+  plaza.rotation.x = -Math.PI / 2;
+  plaza.position.set(50, 0.006, 10.5);
+  scene.add(plaza);
+  // near-side 벤치 + 가로등(라이트 없이 발광 헤드로 — 라이트 최소화)
+  for (let x = 12; x < 108; x += 24) {
+    const bench = box(2, 0.4, 0.6, 0x5a4632);
+    bench.position.set(x, 0.25, 12.5);
+    scene.add(bench);
+    const pole = box(0.15, 3.2, 0.15, 0x2a2440);
+    pole.position.set(x + 6, 1.6, 11.5);
+    scene.add(pole);
+    const head = new THREE.Mesh(boxG(0.4, 0.25, 0.4), new THREE.MeshBasicMaterial({ color: 0xffe9b0 }));
+    head.position.set(x + 6, 3.15, 11.5);
+    scene.add(head);
+    const gl = makeGlow(0xffd98a, 1.8);
+    gl.position.set(x + 6, 3.1, 11.5);
+    scene.add(gl);
+  }
+
+  // ── 골목(세로 탐험) x≈40, 뒤쪽(-z)으로 이어짐 ──
+  const alleyX = 40;
+  const alley = new THREE.Mesh(new THREE.PlaneGeometry(6, 22), new THREE.MeshLambertMaterial({ map: walkTex }));
+  alley.rotation.x = -Math.PI / 2;
+  alley.position.set(alleyX, 0.006, -15);
+  scene.add(alley);
+  for (let z = -9; z > -25; z -= 5) {
+    [alleyX - 3.9, alleyX + 3.9].forEach((x) => {
+      const h = 5 + Math.random() * 4;
+      const b = new THREE.Mesh(boxG(3, h, 4), new THREE.MeshLambertMaterial({ map: wallTex('#1c1836', 0.5) }));
+      b.position.set(x, h / 2, z);
+      scene.add(b);
+    });
+  }
+  const alleySign = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 0.75), new THREE.MeshBasicMaterial({ map: signTex('골목', '#8affc1') }));
+  alleySign.position.set(alleyX, 4.2, -6.3);
+  scene.add(alleySign);
+  const alleyGlow = makeGlow('#8affc1', 3);
+  alleyGlow.position.set(alleyX, 4.2, -6.0);
+  scene.add(alleyGlow);
+  // 골목 끝 '준비중' 가게(향후 확장 자리)
+  const comingSign = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 0.75), new THREE.MeshBasicMaterial({ map: signTex('준비중', '#ffc247') }));
+  comingSign.position.set(alleyX, 3, -24);
+  scene.add(comingSign);
+
   // 달 + 후광
   const moon = new THREE.Mesh(boxG(3, 3, 0.3), new THREE.MeshBasicMaterial({ color: 0xffe9b0 }));
   moon.position.set(40, 26, -40);
