@@ -9,6 +9,7 @@ import { store } from './core/store.js';
 import { initHud } from './ui/hud.js';
 import { createStreet } from './street/index.js';
 import { mountGameScreen } from './ui/gameScreen.js';
+import { initBackButton } from './ui/backButton.js';
 
 // 게임 4종 (공통 인터페이스)
 import yabawi from './games/yabawi/index.js';
@@ -98,3 +99,9 @@ function closeScreen() {
 store.init(); // 저장본 로드(포인트·자산 복원)
 initHud();
 const street = createStreet({ onEnter: openScreen });
+
+// 안드로이드 하드웨어 뒤로가기 → 씬 닫기(홈이면 앱 종료)
+initBackButton({
+  isSceneOpen: () => current !== null,
+  closeScene: closeScreen,
+});

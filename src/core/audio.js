@@ -9,4 +9,11 @@ export const audio = {
   play(_name) {
     /* no-op: 추후 오디오 에셋 로딩 시 교체 */
   },
+
+  // ⚠️ 앱 출시 규칙: 실제 오디오는 반드시 유저 제스처(탭 등) 콜백 안에서
+  // AudioContext.resume()/재생을 시작해야 한다(모바일 웹뷰 자동재생 차단).
+  // 예) 첫 베팅 버튼 클릭 시 unlock() 호출 → 이후 play() 사용.
+  unlock() {
+    /* no-op: 추후 AudioContext 생성/resume 지점 */
+  },
 };
