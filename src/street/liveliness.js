@@ -53,68 +53,94 @@ function ownMarker() {
   return m;
 }
 
+// 탈것은 전부 +Z(앞) 방향으로 제작 → 히어로와 회전 기준 통일.
+// 바퀴는 실린더(축을 X로: rotation.z=π/2) → Z 방향으로 굴러감.
+const tireMat = () => new THREE.MeshLambertMaterial({ color: 0x1a1520 });
+const metalMat = () => new THREE.MeshLambertMaterial({ color: 0xc2c8ce });
+function wheel(r, th, x, y, z, mat) {
+  const w = new THREE.Mesh(new THREE.CylinderGeometry(r, r, th, 14), mat);
+  w.rotation.z = Math.PI / 2;
+  w.position.set(x, y, z);
+  return w;
+}
+
 function makeBike() {
   const g = new THREE.Group();
-  const frame = box(1.0, 0.12, 0.12, 0x8a8a8a);
-  frame.position.y = 0.6;
-  g.add(frame);
-  const seat = box(0.3, 0.12, 0.2, 0x222);
-  seat.position.set(-0.35, 0.72, 0);
+  const tire = tireMat();
+  const metal = metalMat();
+  // 앞/뒤 바퀴(z축 정렬)
+  g.add(wheel(0.34, 0.08, 0, 0.34, 0.52, tire));
+  g.add(wheel(0.34, 0.08, 0, 0.34, -0.52, tire));
+  // 프레임
+  const bar = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.06, 0.95), metal);
+  bar.position.set(0, 0.52, 0);
+  g.add(bar);
+  const down = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.42, 0.06), metal);
+  down.position.set(0, 0.44, 0.28);
+  down.rotation.x = 0.5;
+  g.add(down);
+  // 안장 + 핸들
+  const post = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.34, 0.05), metal);
+  post.position.set(0, 0.6, -0.42);
+  g.add(post);
+  const seat = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.08, 0.32), new THREE.MeshLambertMaterial({ color: 0x201820 }));
+  seat.position.set(0, 0.76, -0.42);
   g.add(seat);
-  [-0.45, 0.45].forEach((x) => {
-    const w = new THREE.Mesh(new THREE.TorusGeometry(0.32, 0.06, 6, 14), new THREE.MeshLambertMaterial({ color: 0x222 }));
-    w.position.set(x, 0.32, 0);
-    g.add(w);
-  });
+  const stem = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.4, 0.05), metal);
+  stem.position.set(0, 0.64, 0.5);
+  g.add(stem);
+  const handle = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.05, 0.05), metal);
+  handle.position.set(0, 0.84, 0.5);
+  g.add(handle);
   g.add(ownMarker());
   return g;
 }
 
 function makeCar(color) {
   const g = new THREE.Group();
-  const body = box(2.2, 0.6, 1.0, color);
+  const bodyMat = new THREE.MeshLambertMaterial({ color });
+  const body = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.5, 2.2), bodyMat);
   body.position.y = 0.55;
   g.add(body);
-  const cabin = box(1.2, 0.5, 0.88, 0xcfe6ff);
-  cabin.position.set(-0.1, 1.0, 0);
+  const cabin = new THREE.Mesh(new THREE.BoxGeometry(0.88, 0.5, 1.1), new THREE.MeshLambertMaterial({ color: 0xcfe6ff }));
+  cabin.position.set(0, 1.02, -0.1);
   g.add(cabin);
+  const tire = tireMat();
   [
-    [0.7, 0.5],
-    [0.7, -0.5],
-    [-0.7, 0.5],
-    [-0.7, -0.5],
-  ].forEach(([x, z]) => {
-    const w = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.28, 0.28, 10), new THREE.MeshLambertMaterial({ color: 0x1a1520 }));
-    w.rotation.x = Math.PI / 2;
-    w.position.set(x, 0.28, z);
-    g.add(w);
-  });
+    [0.55, 0.72],
+    [0.55, -0.72],
+    [-0.55, 0.72],
+    [-0.55, -0.72],
+  ].forEach(([x, z]) => g.add(wheel(0.3, 0.2, x, 0.3, z, tire)));
+  const hl = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.14, 0.05), new THREE.MeshBasicMaterial({ color: 0xfff2b0 }));
+  hl.position.set(0, 0.55, 1.12);
+  g.add(hl);
   g.add(ownMarker());
   return g;
 }
 
 function makeSport(color) {
   const g = new THREE.Group();
-  const body = box(2.7, 0.4, 1.0, color);
+  const bodyMat = new THREE.MeshLambertMaterial({ color });
+  const body = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.36, 2.7), bodyMat);
   body.position.y = 0.42;
   g.add(body);
-  const cabin = box(1.0, 0.4, 0.85, 0x201020);
-  cabin.position.set(-0.1, 0.8, 0);
+  const cabin = new THREE.Mesh(new THREE.BoxGeometry(0.86, 0.34, 0.95), new THREE.MeshLambertMaterial({ color: 0x201020 }));
+  cabin.position.set(0, 0.74, -0.15);
   g.add(cabin);
-  const spoiler = box(0.5, 0.1, 1.0, color);
-  spoiler.position.set(-1.2, 0.75, 0);
+  const spoiler = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.08, 0.3), bodyMat);
+  spoiler.position.set(0, 0.7, -1.28);
   g.add(spoiler);
+  const tire = tireMat();
   [
-    [0.85, 0.52],
-    [0.85, -0.52],
-    [-0.85, 0.52],
-    [-0.85, -0.52],
-  ].forEach(([x, z]) => {
-    const w = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.3, 10), new THREE.MeshLambertMaterial({ color: 0x1a1520 }));
-    w.rotation.x = Math.PI / 2;
-    w.position.set(x, 0.3, z);
-    g.add(w);
-  });
+    [0.56, 0.8],
+    [0.56, -0.8],
+    [-0.56, 0.8],
+    [-0.56, -0.8],
+  ].forEach(([x, z]) => g.add(wheel(0.32, 0.22, x, 0.32, z, tire)));
+  const hl = new THREE.Mesh(new THREE.BoxGeometry(0.82, 0.1, 0.05), new THREE.MeshBasicMaterial({ color: 0xfff2b0 }));
+  hl.position.set(0, 0.42, 1.37);
+  g.add(hl);
   g.add(ownMarker());
   return g;
 }
