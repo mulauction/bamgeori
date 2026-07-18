@@ -58,6 +58,17 @@ export function makeVoxelDog(color) {
   const tail = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.12, 0.12), bodyMat);
   tail.position.set(-0.65, 0.75, 0);
   g.add(tail);
+  // 눈 + 목줄(디테일)
+  const eyeGeo = new THREE.BoxGeometry(0.07, 0.07, 0.07);
+  const eyeMat = new THREE.MeshBasicMaterial({ color: 0x141018 });
+  [0.14, -0.14].forEach((z) => {
+    const eye = new THREE.Mesh(eyeGeo, eyeMat);
+    eye.position.set(0.9, 0.86, z);
+    g.add(eye);
+  });
+  const collar = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.1, 0.5), new THREE.MeshLambertMaterial({ color: 0xff5964 }));
+  collar.position.set(0.5, 0.62, 0);
+  g.add(collar);
   // 다리 4개 (앞뒤 좌우) — 상단 기준 회전
   const legs = [];
   const legGeo = new THREE.BoxGeometry(0.16, 0.5, 0.16);
@@ -108,6 +119,26 @@ export function makeVoxelChicken(bodyColor) {
   const wing2 = wing.clone();
   wing2.position.z = -0.3;
   g.add(wing2);
+  // 눈 + 꼬리깃(디테일)
+  const eyeGeo = new THREE.BoxGeometry(0.07, 0.07, 0.07);
+  const eyeMat = new THREE.MeshBasicMaterial({ color: 0x141018 });
+  [0.13, -0.13].forEach((z) => {
+    const eye = new THREE.Mesh(eyeGeo, eyeMat);
+    eye.position.set(0.52, 1.28, z);
+    g.add(eye);
+  });
+  const tail1 = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.5, 0.08), bodyMat);
+  tail1.position.set(-0.42, 0.95, 0);
+  tail1.rotation.z = -0.6;
+  g.add(tail1);
+  const tail2 = tail1.clone();
+  tail2.position.z = 0.14;
+  tail2.rotation.z = -0.9;
+  g.add(tail2);
+  const tail3 = tail1.clone();
+  tail3.position.z = -0.14;
+  tail3.rotation.z = -0.9;
+  g.add(tail3);
   const legs = [];
   const legGeo = new THREE.BoxGeometry(0.1, 0.4, 0.1);
   legGeo.translate(0, -0.2, 0);

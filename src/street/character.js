@@ -75,6 +75,38 @@ export function createHero() {
   legR.position.x = 0.2;
   hero.add(legR);
 
+  // ── 디테일(실루엣 개선): 머리카락 볼륨 · 손 · 신발 · 재킷 지퍼 ──
+  const hairTop = mat(0x241a30);
+  const top = new THREE.Mesh(boxG(0.86, 0.24, 0.86), hairTop);
+  top.position.y = 2.5;
+  hero.add(top);
+  const back = new THREE.Mesh(boxG(0.86, 0.5, 0.16), hairTop);
+  back.position.set(0, 2.15, -0.34);
+  hero.add(back);
+  // 손 (팔 끝, 팔에 종속되어 함께 스윙)
+  const handGeo = boxG(0.28, 0.2, 0.28);
+  const handMat = mat(0xf0c8a0);
+  [armL, armR].forEach((arm) => {
+    const hand = new THREE.Mesh(handGeo, handMat);
+    hand.position.set(0, -0.78, 0);
+    arm.add(hand);
+  });
+  // 신발 (다리 끝, 다리에 종속)
+  const shoeGeo = boxG(0.36, 0.18, 0.44);
+  const shoeMat = mat(0x1b1522);
+  [legL, legR].forEach((leg) => {
+    const shoe = new THREE.Mesh(shoeGeo, shoeMat);
+    shoe.position.set(0, -0.78, 0.06);
+    leg.add(shoe);
+  });
+  // 재킷 지퍼/카라
+  const zip = new THREE.Mesh(boxG(0.08, 0.9, 0.02), mat(0x2b2136));
+  zip.position.set(0, 1.28, 0.24);
+  hero.add(zip);
+  const collar = new THREE.Mesh(boxG(0.84, 0.14, 0.5), mat(0xb83a2c));
+  collar.position.set(0, 1.72, 0);
+  hero.add(collar);
+
   // 금목걸이(과시템 보유 시 표시) — 목 높이 금색 링
   const necklace = new THREE.Mesh(new THREE.TorusGeometry(0.28, 0.06, 6, 12), new THREE.MeshLambertMaterial({ color: 0xffc247 }));
   necklace.rotation.x = Math.PI / 2;
