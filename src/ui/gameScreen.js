@@ -72,11 +72,9 @@ export function mountGameScreen(container, game, onBack) {
       const grade = fx.gradeOf(multiplier);
       result.textContent = (GRADE_LABEL[grade] || '') + '승리! +' + fmt(gain) + 'P';
       result.className = 'result win';
-      audio.play('win');
     } else {
       result.textContent = '패배… -' + fmt(bet) + 'P';
       result.className = 'result lose';
-      audio.play('lose');
       if (store.getPoints() <= 0) {
         setTimeout(() => toast('빈털터리… 새벽 대리운전이 기다립니다'), 700);
       }
@@ -109,6 +107,13 @@ export function mountGameScreen(container, game, onBack) {
       const { win, multiplier } = await game.start(bet);
       if (!alive) return;
       const gain = settleWager(store, { win, bet, multiplier, gameId: game.id });
+      // 승리 등급 연출(fx) — 사운드/파티클/진동. 패배는 짧고 담백.
+      if (win) {
+        await fx.playWin(fx.gradeOf(multiplier), { amount: gain, multiplier, gameName: game.name });
+        if (!alive) return;
+      } else {
+        fx.playLose();
+      }
       showWager(win, gain, bet, multiplier);
       go.disabled = false;
       game.reset?.();
