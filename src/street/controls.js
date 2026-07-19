@@ -15,10 +15,17 @@ export function createControls({ onEnter } = {}) {
   const knob = document.getElementById('knob');
   const jumpBtn = document.getElementById('jump');
 
-  // 카메라 방향 (드래그로 갱신)
-  const cam = { yaw: 0, pitch: 0.32 };
+  // 카메라 방향/거리 (드래그로 회전, 핀치·휠로 줌)
+  const cam = { yaw: 0, pitch: 0.32, dist: 8.5 };
+  const DIST_MIN = 3.5;
+  const DIST_MAX = 18;
   const keys = {};
   let jumpQueued = false;
+
+  // ── 확대/축소: 두 손가락 핀치(모바일) + 휠(PC) ──
+  const pinch = { active: false, startDist: 0, startCam: 0 };
+  const touchDist = (a, b) => Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+  const clampDist = (d) => Math.max(DIST_MIN, Math.min(DIST_MAX, d));
 
   // ── 왼손 조이스틱 ──
   const joy = { id: null, vx: 0, vz: 0 };
@@ -62,6 +69,14 @@ export function createControls({ onEnter } = {}) {
   canvas.addEventListener(
     'touchstart',
     (e) => {
+      // 두 손가락이 캔버스에 닿으면 핀치 줌 시작(회전은 중지)
+      if (e.targetTouches.length === 2) {
+        pinch.active = true;
+        pinch.startDist = touchDist(e.targetTouches[0], e.targetTouches[1]);
+        pinch.startCam = cam.dist;
+        look.id = null;
+        return;
+      }
       const t = e.changedTouches[0];
       if (look.id === null) {
         look.id = t.identifier;
@@ -70,6 +85,29 @@ export function createControls({ onEnter } = {}) {
       }
     },
     { passive: true }
+  );
+  canvas.addEventListener(
+    'touchmove',
+    (e) => {
+      if (pinch.active && e.targetTouches.length === 2) {
+        e.preventDefault();
+        const d = touchDist(e.targetTouches[0], e.targetTouches[1]);
+        if (d > 0) cam.dist = clampDist(pinch.startCam * (pinch.startDist / d));
+      }
+    },
+    { passive: false }
+  );
+  canvas.addEventListener('touchend', (e) => {
+    if (pinch.active && e.targetTouches.length < 2) pinch.active = false;
+  });
+  // PC 휠 줌
+  canvas.addEventListener(
+    'wheel',
+    (e) => {
+      e.preventDefault();
+      cam.dist = clampDist(cam.dist + e.deltaY * 0.01);
+    },
+    { passive: false }
   );
   window.addEventListener(
     'touchmove',

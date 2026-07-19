@@ -28,6 +28,20 @@ function canvasTex(w, h, draw) {
   return t;
 }
 
+// public/textures/<name>.png 가 있으면 그 이미지로 교체(없으면 절차생성 유지)
+function tryOverrideTexture(name, tex) {
+  const img = new Image();
+  img.onload = () => {
+    tex.image = img;
+    tex.magFilter = THREE.LinearFilter;
+    tex.minFilter = THREE.LinearMipmapLinearFilter;
+    tex.generateMipmaps = true;
+    tex.needsUpdate = true;
+  };
+  img.src = 'textures/' + name + '.png';
+  return tex;
+}
+
 function wallTex(base, winLit) {
   return canvasTex(64, 64, (g) => {
     g.fillStyle = base;
@@ -128,6 +142,7 @@ export function createScene(canvas) {
   });
   roadTex.wrapS = roadTex.wrapT = THREE.RepeatWrapping;
   roadTex.repeat.set(40, 4);
+  tryOverrideTexture('road', roadTex);
   const road = new THREE.Mesh(new THREE.PlaneGeometry(200, 14), new THREE.MeshLambertMaterial({ map: roadTex }));
   road.rotation.x = -Math.PI / 2;
   road.position.set(50, 0, 3.5);
@@ -152,6 +167,7 @@ export function createScene(canvas) {
   });
   walkTex.wrapS = walkTex.wrapT = THREE.RepeatWrapping;
   walkTex.repeat.set(50, 2);
+  tryOverrideTexture('ground', walkTex);
   const walk = new THREE.Mesh(new THREE.PlaneGeometry(200, 5), new THREE.MeshLambertMaterial({ map: walkTex }));
   walk.rotation.x = -Math.PI / 2;
   walk.position.set(50, 0.01, -2.0);
@@ -218,7 +234,7 @@ export function createScene(canvas) {
       addSolid(s.x, -5.5, 4.4, 1.6); // 포장마차 좌판
     } else {
       const g = new THREE.Group();
-      const bld = new THREE.Mesh(boxG(s.w, s.h, 7), new THREE.MeshLambertMaterial({ map: wallTex(s.base, 0.55) }));
+      const bld = new THREE.Mesh(boxG(s.w, s.h, 7), new THREE.MeshLambertMaterial({ map: tryOverrideTexture('wall', wallTex(s.base, 0.55)) }));
       bld.position.y = s.h / 2;
       bld.castShadow = true;
       bld.receiveShadow = true;
@@ -254,7 +270,7 @@ export function createScene(canvas) {
   for (let i = 0; i < 16; i++) {
     const h = 6 + Math.random() * 10;
     const w = 4 + Math.random() * 5;
-    const b = new THREE.Mesh(boxG(w, h, 5), new THREE.MeshLambertMaterial({ map: wallTex('#151129', 0.25) }));
+    const b = new THREE.Mesh(boxG(w, h, 5), new THREE.MeshLambertMaterial({ map: tryOverrideTexture('wall', wallTex('#151129', 0.25)) }));
     const bx = -6 + i * 8 + Math.random() * 3;
     const bz = -16 - Math.random() * 6;
     b.position.set(bx, h / 2, bz);
@@ -310,7 +326,7 @@ export function createScene(canvas) {
   for (let z = -9; z > -25; z -= 5) {
     [alleyX - 3.9, alleyX + 3.9].forEach((x) => {
       const h = 5 + Math.random() * 4;
-      const b = new THREE.Mesh(boxG(3, h, 4), new THREE.MeshLambertMaterial({ map: wallTex('#1c1836', 0.5) }));
+      const b = new THREE.Mesh(boxG(3, h, 4), new THREE.MeshLambertMaterial({ map: tryOverrideTexture('wall', wallTex('#1c1836', 0.5)) }));
       b.position.set(x, h / 2, z);
       b.castShadow = true;
       b.receiveShadow = true;

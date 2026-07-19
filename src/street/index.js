@@ -48,7 +48,6 @@ export function createStreet({ onEnter }) {
 
   // 히어로 상태
   const H = { x: 2, z: -1.5, y: 0, vy: 0, phase: 0, facing: Math.PI / 2 };
-  const camDist = 8.5;
   let nearShop = null;
   let active = true;
 
@@ -197,7 +196,7 @@ export function createStreet({ onEnter }) {
     const tx = H.x;
     const ty = 1.5 + H.y * 0.6;
     const tz = H.z;
-    let cd = camDist;
+    let cd = controls.cam.dist; // 핀치/휠 줌 반영
     for (let k = 0; k < 6; k++) {
       if (!blocked(tx + sy * cp * cd, tz + cy * cp * cd)) break;
       cd -= 1.2;
