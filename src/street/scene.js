@@ -101,7 +101,7 @@ export function createScene(canvas) {
   scene.add(moonLight);
   // 그림자: 플레이어 주변만 커버하는 이동식 섀도우 카메라(선명 + 저비용)
   moonLight.castShadow = true;
-  moonLight.shadow.mapSize.set(2048, 2048);
+  moonLight.shadow.mapSize.set(1024, 1024); // 모바일 성능 — 커버 범위가 좁아 1024로도 선명
   moonLight.shadow.bias = -0.0004;
   moonLight.shadow.normalBias = 0.03;
   const sc = moonLight.shadow.camera;
