@@ -4,7 +4,7 @@
 // ══════════════════════════════════════════════════════════════
 
 import * as THREE from 'three';
-import { makeBlobShadow, makeGlow } from '../games/visuals.js';
+import { makeGlow } from '../games/visuals.js';
 
 function canvasTex(w, h, draw) {
   const c = document.createElement('canvas');
@@ -144,11 +144,10 @@ export function createHero() {
     shoeMat.color.setHex(owned.has('goldshoes') ? 0xffc247 : 0x1b1522);
   }
 
-  // 발밑 블롭 그림자(접지감). 점프 시에도 바닥에 남도록 y 보정.
-  const shadow = makeBlobShadow(0.7);
-  hero.add(shadow);
-
   hero.position.set(2, 0, -1.5);
+  hero.traverse((o) => {
+    if (o.isMesh) o.castShadow = true;
+  });
 
   // 걷기 애니메이션 + 위치 적용
   function applyPose({ x, y, z, facing, phase, moving }) {
@@ -160,10 +159,6 @@ export function createHero() {
     const bob = moving && y === 0 ? Math.abs(Math.sin(phase)) * 0.06 : 0;
     hero.position.set(x, y + bob, z);
     hero.rotation.y = facing;
-    // 그림자는 항상 지면(월드 y≈0.02)에 고정 + 점프 높이에 따라 축소
-    shadow.position.y = 0.02 - (y + bob);
-    const sc = 1 / (1 + y * 0.6);
-    shadow.scale.setScalar(sc);
   }
 
   // 파산 시 남루한 외형(어두운 텍스처 스왑) — armR/legR은 재질을 공유

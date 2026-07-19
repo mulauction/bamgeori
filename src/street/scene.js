@@ -77,6 +77,8 @@ export function createScene(canvas) {
   // 필믹 톤매핑 — 밤거리 네온이 뭉개지지 않고 살아나게
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.25;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x14122a);
@@ -97,6 +99,25 @@ export function createScene(canvas) {
   const moonLight = new THREE.DirectionalLight(0xbcc8ff, 0.6);
   moonLight.position.set(-10, 30, 10);
   scene.add(moonLight);
+  // 그림자: 플레이어 주변만 커버하는 이동식 섀도우 카메라(선명 + 저비용)
+  moonLight.castShadow = true;
+  moonLight.shadow.mapSize.set(2048, 2048);
+  moonLight.shadow.bias = -0.0004;
+  moonLight.shadow.normalBias = 0.03;
+  const sc = moonLight.shadow.camera;
+  sc.near = 1;
+  sc.far = 90;
+  sc.left = -20;
+  sc.right = 20;
+  sc.top = 20;
+  sc.bottom = -20;
+  const shadowTarget = new THREE.Object3D();
+  scene.add(shadowTarget);
+  moonLight.target = shadowTarget;
+  function updateShadowFocus(x, z) {
+    shadowTarget.position.set(x, 0, z);
+    moonLight.position.set(x - 12, 34, z + 12);
+  }
 
   // 도로 + 인도
   const roadTex = canvasTex(64, 64, (g) => {
@@ -110,6 +131,7 @@ export function createScene(canvas) {
   const road = new THREE.Mesh(new THREE.PlaneGeometry(200, 14), new THREE.MeshLambertMaterial({ map: roadTex }));
   road.rotation.x = -Math.PI / 2;
   road.position.set(50, 0, 3.5);
+  road.receiveShadow = true;
   scene.add(road);
 
   const walkTex = canvasTex(64, 64, (g) => {
@@ -133,6 +155,7 @@ export function createScene(canvas) {
   const walk = new THREE.Mesh(new THREE.PlaneGeometry(200, 5), new THREE.MeshLambertMaterial({ map: walkTex }));
   walk.rotation.x = -Math.PI / 2;
   walk.position.set(50, 0.01, -2.0);
+  walk.receiveShadow = true;
   scene.add(walk);
 
   // 중앙선
@@ -197,6 +220,8 @@ export function createScene(canvas) {
       const g = new THREE.Group();
       const bld = new THREE.Mesh(boxG(s.w, s.h, 7), new THREE.MeshLambertMaterial({ map: wallTex(s.base, 0.55) }));
       bld.position.y = s.h / 2;
+      bld.castShadow = true;
+      bld.receiveShadow = true;
       g.add(bld);
       const roof = new THREE.Mesh(boxG(s.w + 0.6, 0.5, 7.6), mat(0x12101c));
       roof.position.y = s.h + 0.25;
@@ -257,6 +282,7 @@ export function createScene(canvas) {
   const plaza = new THREE.Mesh(new THREE.PlaneGeometry(220, 13), new THREE.MeshLambertMaterial({ map: walkTex }));
   plaza.rotation.x = -Math.PI / 2;
   plaza.position.set(50, 0.006, 10.5);
+  plaza.receiveShadow = true;
   scene.add(plaza);
   // near-side 벤치 + 가로등(라이트 없이 발광 헤드로 — 라이트 최소화)
   for (let x = 12; x < 108; x += 24) {
@@ -279,12 +305,15 @@ export function createScene(canvas) {
   const alley = new THREE.Mesh(new THREE.PlaneGeometry(6, 22), new THREE.MeshLambertMaterial({ map: walkTex }));
   alley.rotation.x = -Math.PI / 2;
   alley.position.set(alleyX, 0.006, -15);
+  alley.receiveShadow = true;
   scene.add(alley);
   for (let z = -9; z > -25; z -= 5) {
     [alleyX - 3.9, alleyX + 3.9].forEach((x) => {
       const h = 5 + Math.random() * 4;
       const b = new THREE.Mesh(boxG(3, h, 4), new THREE.MeshLambertMaterial({ map: wallTex('#1c1836', 0.5) }));
       b.position.set(x, h / 2, z);
+      b.castShadow = true;
+      b.receiveShadow = true;
       scene.add(b);
       addSolid(x, z, 3, 4);
     });
@@ -347,5 +376,5 @@ export function createScene(canvas) {
     camera.updateProjectionMatrix();
   }
 
-  return { renderer, scene, camera, resize, setDaylight, solids };
+  return { renderer, scene, camera, resize, setDaylight, solids, updateShadowFocus };
 }

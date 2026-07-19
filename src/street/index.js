@@ -25,7 +25,7 @@ export function createStreet({ onEnter }) {
   const canvas = document.getElementById('gl');
   const enterBtn = document.getElementById('enterbtn');
 
-  const { renderer, scene, camera, resize, setDaylight, solids } = createScene(canvas);
+  const { renderer, scene, camera, resize, setDaylight, solids, updateShadowFocus } = createScene(canvas);
   const hero = createHero();
   scene.add(hero.group);
 
@@ -180,6 +180,7 @@ export function createStreet({ onEnter }) {
     }
 
     hero.applyPose({ x: H.x, y: H.y, z: H.z, facing: H.facing, phase: H.phase, moving });
+    updateShadowFocus(H.x, H.z); // 그림자 카메라를 플레이어 주변으로
 
     // 탈것 탑승: 히어로를 살짝 올리고 탈것을 발밑으로 이동
     if (riding) {
