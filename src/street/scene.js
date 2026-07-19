@@ -84,6 +84,11 @@ export function createScene(canvas) {
 
   const camera = new THREE.PerspectiveCamera(55, 1, 0.1, 200);
 
+  // 충돌용 솔리드(건물 footprint) — 플레이어/카메라가 벽을 못 뚫게
+  const solids = [];
+  const addSolid = (cx, cz, w, d, m = 0.4) =>
+    solids.push({ minX: cx - w / 2 - m, maxX: cx + w / 2 + m, minZ: cz - d / 2 - m, maxZ: cz + d / 2 + m });
+
   // 조명 — 전체적으로 올려 가독성 확보(밤 분위기는 유지)
   const ambient = new THREE.AmbientLight(0x5a5686, 1.35);
   scene.add(ambient);
@@ -187,6 +192,7 @@ export function createScene(canvas) {
       g.add(lampGlow);
       g.position.set(s.x, 0, -5.5);
       scene.add(g);
+      addSolid(s.x, -5.5, 4.4, 1.6); // 포장마차 좌판
     } else {
       const g = new THREE.Group();
       const bld = new THREE.Mesh(boxG(s.w, s.h, 7), new THREE.MeshLambertMaterial({ map: wallTex(s.base, 0.55) }));
@@ -215,6 +221,7 @@ export function createScene(canvas) {
       g.add(neon);
       g.position.set(s.x, 0, -6.5);
       scene.add(g);
+      addSolid(s.x, -6.5, s.w, 7); // 가게 건물
     }
   });
 
@@ -223,8 +230,11 @@ export function createScene(canvas) {
     const h = 6 + Math.random() * 10;
     const w = 4 + Math.random() * 5;
     const b = new THREE.Mesh(boxG(w, h, 5), new THREE.MeshLambertMaterial({ map: wallTex('#151129', 0.25) }));
-    b.position.set(-6 + i * 8 + Math.random() * 3, h / 2, -16 - Math.random() * 6);
+    const bx = -6 + i * 8 + Math.random() * 3;
+    const bz = -16 - Math.random() * 6;
+    b.position.set(bx, h / 2, bz);
     scene.add(b);
+    addSolid(bx, bz, w, 5);
   }
 
   // 가로등
@@ -276,6 +286,7 @@ export function createScene(canvas) {
       const b = new THREE.Mesh(boxG(3, h, 4), new THREE.MeshLambertMaterial({ map: wallTex('#1c1836', 0.5) }));
       b.position.set(x, h / 2, z);
       scene.add(b);
+      addSolid(x, z, 3, 4);
     });
   }
   const alleySign = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 0.75), new THREE.MeshBasicMaterial({ map: signTex('골목', '#8affc1') }));
@@ -336,5 +347,5 @@ export function createScene(canvas) {
     camera.updateProjectionMatrix();
   }
 
-  return { renderer, scene, camera, resize, setDaylight };
+  return { renderer, scene, camera, resize, setDaylight, solids };
 }

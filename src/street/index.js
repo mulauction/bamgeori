@@ -25,9 +25,17 @@ export function createStreet({ onEnter }) {
   const canvas = document.getElementById('gl');
   const enterBtn = document.getElementById('enterbtn');
 
-  const { renderer, scene, camera, resize, setDaylight } = createScene(canvas);
+  const { renderer, scene, camera, resize, setDaylight, solids } = createScene(canvas);
   const hero = createHero();
   scene.add(hero.group);
+
+  // 건물 충돌 판정(2D footprint)
+  function blocked(x, z) {
+    for (const s of solids) {
+      if (x > s.minX && x < s.maxX && z > s.minZ && z < s.maxZ) return true;
+    }
+    return false;
+  }
 
   // 게임 내 시간 흐름(자동 낮/밤). 한 사이클 ≈ 100초. 밤에서 시작.
   const DAY_CYCLE = 100000;
@@ -137,11 +145,14 @@ export function createStreet({ onEnter }) {
       const mx = ix * c + iz * s;
       const mz = -ix * s + iz * c;
       const spd = 0.0058 * dt * (bankrupt ? 0.55 : 1) * (riding ? 1.9 : 1); // 파산 처짐 / 탈것 가속
-      H.x = Math.max(-4, Math.min(108, H.x + mx * spd));
+      const nx = Math.max(-4, Math.min(108, H.x + mx * spd));
       // 세로 이동: 기본은 넓은 거리, x≈40 골목에서는 뒤쪽으로 더 깊이
       const inAlley = Math.abs(H.x - 40) < 2.6;
       const zMin = inAlley ? -24 : -3.8;
-      H.z = Math.max(zMin, Math.min(13.5, H.z + mz * spd));
+      const nz = Math.max(zMin, Math.min(13.5, H.z + mz * spd));
+      // 축별 이동 → 벽에 부딪히면 그 축만 막고 미끄러짐(건물 관통 방지)
+      if (!blocked(nx, H.z)) H.x = nx;
+      if (!blocked(H.x, nz)) H.z = nz;
       H.facing = Math.atan2(mx, mz);
       H.phase += dt * 0.012;
     } else {
@@ -177,17 +188,24 @@ export function createStreet({ onEnter }) {
       riding.group.rotation.y = H.facing;
     }
 
-    // 궤도 카메라
+    // 궤도 카메라 (벽에 닿으면 거리를 줄여 관통 방지)
     const cp = Math.cos(controls.cam.pitch);
     const sp = Math.sin(controls.cam.pitch);
+    const sy = Math.sin(controls.cam.yaw);
+    const cy = Math.cos(controls.cam.yaw);
     const tx = H.x;
     const ty = 1.5 + H.y * 0.6;
     const tz = H.z;
-    camera.position.set(
-      tx + Math.sin(controls.cam.yaw) * cp * camDist,
-      Math.max(0.6, ty + sp * camDist),
-      tz + Math.cos(controls.cam.yaw) * cp * camDist
-    );
+    let cd = camDist;
+    for (let k = 0; k < 6; k++) {
+      if (!blocked(tx + sy * cp * cd, tz + cy * cp * cd)) break;
+      cd -= 1.2;
+      if (cd < 2) {
+        cd = 2;
+        break;
+      }
+    }
+    camera.position.set(tx + sy * cp * cd, Math.max(0.6, ty + sp * cd), tz + cy * cp * cd);
     camera.lookAt(tx, ty, tz);
 
     // 근접 상점/탈것 감지 → 문맥 버튼
