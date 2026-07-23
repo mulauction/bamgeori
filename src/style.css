@@ -80,10 +80,9 @@ body.bankrupt{filter:brightness(.6) saturate(.5)}
   font-size:12px;color:var(--dim);flex-wrap:wrap;background:#0f0c1a;border-radius:5px;padding:8px 10px}
 .oddsreadout b{color:var(--paper)}
 
-/* 대형 캐시아웃/스톱 버튼 (캐시아웃형 게임에서 가장 크게) */
-.stopbtn{width:100%;border:none;border-radius:8px;padding:20px;font-weight:900;font-size:22px;cursor:pointer;
-  background:var(--win);color:#06331d;box-shadow:0 6px 0 #2a8a5a;font-family:sans-serif;
-  position:sticky;bottom:calc(12px + env(safe-area-inset-bottom));z-index:8}
+/* 대형 캐시아웃/스톱 버튼 (캐시아웃형 게임에서 가장 크게, 게임 영역 안 in-flow) */
+.stopbtn{width:100%;border:none;border-radius:8px;padding:22px;font-weight:900;font-size:24px;cursor:pointer;
+  background:var(--win);color:#06331d;box-shadow:0 6px 0 #2a8a5a;font-family:sans-serif;margin-bottom:12px}
 .stopbtn:active{transform:translateY(3px);box-shadow:0 3px 0 #2a8a5a}
 .stopbtn:disabled{opacity:.4;box-shadow:none}
 
@@ -138,6 +137,14 @@ body.bankrupt{filter:brightness(.6) saturate(.5)}
 .cup .ball{position:absolute;bottom:2px;left:50%;transform:translateX(-50%);
   width:24px;height:24px;background:var(--amber);border:3px solid #7a5a10;border-radius:2px;opacity:0}
 .cup .ball.show{opacity:1}
+
+/* ── 그리드형(마인즈·타워) ── */
+.minegrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:12px}
+.minecell{aspect-ratio:1;border:2px solid var(--line);border-radius:6px;background:var(--panel);
+  font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.minecell:disabled{cursor:default}
+.minecell.safe{border-color:var(--win);background:#123626}
+.minecell.mine{border-color:var(--lantern);background:#3a1519}
 
 /* ── 대리운전 ── */
 .tapzone{height:170px;border-radius:6px;background:var(--panel);border:3px dashed var(--win);
