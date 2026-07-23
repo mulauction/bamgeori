@@ -163,6 +163,12 @@ body.bankrupt{filter:brightness(.6) saturate(.5)}
   align-items:center;justify-content:center;font-weight:900;font-size:15px;flex:0 0 auto;color:#0d0b16}
 .reelmarker{position:absolute;left:50%;top:0;bottom:0;width:3px;background:var(--lantern);transform:translateX(-50%);z-index:2;box-shadow:0 0 10px var(--lantern)}
 
+/* 전진 버튼(치킨로드) */
+.advbtn{width:100%;border:none;border-radius:8px;padding:16px;font-weight:900;font-size:18px;cursor:pointer;
+  background:var(--amber);color:#1a1206;box-shadow:0 5px 0 #8a6410;font-family:sans-serif;margin-bottom:8px}
+.advbtn:active{transform:translateY(2px);box-shadow:0 3px 0 #8a6410}
+.advbtn:disabled{opacity:.4;box-shadow:none}
+
 /* ── 대리운전 ── */
 .tapzone{height:170px;border-radius:6px;background:var(--panel);border:3px dashed var(--win);
   display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;
