@@ -3,8 +3,11 @@
 //  배당 = payoutFor(해당 확률) → EV=RTP. 연승·캐시아웃. 다음 숫자 사전 확정.
 // ══════════════════════════════════════════════════════════════
 
-import { payoutFor } from '../../core/economy.js';
+import { RTP } from '../../core/economy.js';
 import { wait } from '../../ui/util.js';
+
+// 공정 배율(1/확률). RTP는 시작 배수에 한 번만 반영 → 어느 시점 캐시아웃도 EV=RTP.
+const fair = (p) => 1 / p;
 import { toast } from '../../ui/toast.js';
 import { createTableScene } from '../tableScene.js';
 import { box } from '../voxel.js';
@@ -47,8 +50,8 @@ function updateButtons() {
   const bL = pickBox.children[1];
   bH.disabled = ph <= 0;
   bL.disabled = pl <= 0;
-  bH.textContent = ph > 0 ? '⬆ 높음 ×' + payoutFor(ph).toFixed(2) : '⬆ 불가';
-  bL.textContent = pl > 0 ? '⬇ 낮음 ×' + payoutFor(pl).toFixed(2) : '⬇ 불가';
+  bH.textContent = ph > 0 ? '⬆ 높음 ×' + fair(ph).toFixed(2) : '⬆ 불가';
+  bL.textContent = pl > 0 ? '⬇ 낮음 ×' + fair(pl).toFixed(2) : '⬇ 불가';
 }
 
 function setPicksEnabled(on) {
@@ -77,7 +80,7 @@ async function guess(side) {
   setPicksEnabled(false);
   cashBtn.disabled = true;
   const prob = side === 'high' ? probHigh(C) : probLow(C);
-  const pay = payoutFor(prob);
+  const pay = fair(prob);
   let next = C;
   while (next === C) next = 1 + Math.floor(Math.random() * MAXN); // ≠ 현재, 사전 확정
   await wait(300);
@@ -134,7 +137,7 @@ export default {
     };
     container.appendChild(cashBtn);
     C = 25;
-    mult = 1;
+    mult = RTP;
     showNum();
     setPicksEnabled(false);
   },
@@ -142,7 +145,7 @@ export default {
   reset() {
     active = false;
     busy = false;
-    mult = 1;
+    mult = RTP;
     C = 1 + Math.floor(Math.random() * MAXN);
     showNum();
     if (cashBtn) cashBtn.style.display = 'none';
@@ -151,7 +154,7 @@ export default {
 
   start() {
     C = 1 + Math.floor(Math.random() * MAXN);
-    mult = 1;
+    mult = RTP;
     active = true;
     busy = false;
     showNum();

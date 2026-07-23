@@ -134,7 +134,7 @@ export default {
   start(bet, opts) {
     mineCount = (opts && opts.risk) || 3;
     revealed = 0;
-    mult = 1;
+    mult = RTP; // RTP를 한 번만 반영(각 오픈은 공정 배율) → 어느 시점 캐시아웃도 EV=RTP
     buildGrid();
     // 독 위치 사전 확정
     mines = new Set();

@@ -4,12 +4,12 @@
 // ══════════════════════════════════════════════════════════════
 
 import * as THREE from 'three';
-import { payoutFor } from '../../core/economy.js';
+import { RTP } from '../../core/economy.js';
 import { wait } from '../../ui/util.js';
 import { toast } from '../../ui/toast.js';
 import { createTableScene } from '../tableScene.js';
 
-const STEP = payoutFor(0.5); // 1.9
+const STEP = 2; // 공정 배율(앞/뒤 0.5). RTP는 시작 배수에 한 번만 반영 → 첫 승 캐시아웃 1.9배
 
 let view = null;
 let coin = null;
@@ -100,7 +100,7 @@ export default {
   minBet: 500,
   kind: 'wager',
   preview() {
-    return { prob: 0.5, payout: STEP };
+    return { prob: 0.5, payout: RTP * STEP };
   },
 
   mount(container) {
@@ -127,14 +127,14 @@ export default {
   reset() {
     active = false;
     flipping = false;
-    mult = 1;
+    mult = RTP;
     if (numEl) numEl.textContent = '1.00×';
     if (cashBtn) cashBtn.style.display = 'none';
     setPicksEnabled(false);
   },
 
   start() {
-    mult = 1;
+    mult = RTP;
     active = true;
     flipping = false;
     numEl.textContent = '1.00×';
