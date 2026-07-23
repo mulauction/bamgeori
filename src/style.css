@@ -150,6 +150,9 @@ body.bankrupt{filter:brightness(.6) saturate(.5)}
 .minecell:disabled{cursor:default}
 .minecell.safe{border-color:var(--win);background:#123626}
 .minecell.mine{border-color:var(--lantern);background:#3a1519}
+.towergrid{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.towerrow{display:flex;gap:5px}
+.towerrow .minecell{flex:1;aspect-ratio:auto;height:42px}
 
 /* ── 대리운전 ── */
 .tapzone{height:170px;border-radius:6px;background:var(--panel);border:3px dashed var(--win);
