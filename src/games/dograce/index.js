@@ -170,6 +170,9 @@ function buildPicks() {
 export default {
   id: 'dograce',
   name: '달빛 개경주장',
+  sign: '개경주',
+  color: '#6fd3ff',
+  district: 'main',
   sub: '배당이 높을수록 이변입니다. 어디에 거시겠습니까.',
   actionLabel: '출발!',
   minBet: 500,

@@ -6,15 +6,7 @@
 
 import * as THREE from 'three';
 import { makeGlow } from '../games/visuals.js';
-
-// 거리에 놓인 가게들. scene 값이 진입 시 열릴 화면 id.
-export const SHOPS = [
-  { x: 8, name: '야바위 포장마차', scene: 'yabawi', sign: '야바위', color: '#ff8f5e', stall: true },
-  { x: 30, name: '달빛 개경주장', scene: 'dograce', sign: '개경주', color: '#6fd3ff', w: 10, h: 9, base: '#243a63' },
-  { x: 52, name: '뒷골목 닭싸움장', scene: 'cockfight', sign: '닭싸움', color: '#ffd166', w: 9, h: 7, base: '#5c3a24' },
-  { x: 74, name: '새벽 대리운전', scene: 'work-daeri', sign: '대리운전', color: '#8affc1', w: 8, h: 6, base: '#1f4238' },
-  { x: 96, name: '황금 전당포', scene: 'mall', sign: '전당포', color: '#e0b3ff', w: 9, h: 8, base: '#4a2a5c' },
-];
+import { PLACES, STREET_END } from '../games/registry.js';
 
 // ── 캔버스 텍스처 유틸 ─────────────────────────────────────────
 function canvasTex(w, h, draw) {
@@ -105,6 +97,11 @@ export function createScene(canvas) {
   const addSolid = (cx, cz, w, d, m = 0.4) =>
     solids.push({ minX: cx - w / 2 - m, maxX: cx + w / 2 + m, minZ: cz - d / 2 - m, maxZ: cz + d / 2 + m });
 
+  // 거리 길이(레지스트리 가게 수에 따라 동적)
+  const END = STREET_END;
+  const CENTER = END / 2;
+  const LEN = END + 40;
+
   // 조명 — 전체적으로 올려 가독성 확보(밤 분위기는 유지)
   const ambient = new THREE.AmbientLight(0x5a5686, 1.35);
   scene.add(ambient);
@@ -143,9 +140,9 @@ export function createScene(canvas) {
   roadTex.wrapS = roadTex.wrapT = THREE.RepeatWrapping;
   roadTex.repeat.set(40, 4);
   tryOverrideTexture('road', roadTex);
-  const road = new THREE.Mesh(new THREE.PlaneGeometry(200, 14), new THREE.MeshLambertMaterial({ map: roadTex }));
+  const road = new THREE.Mesh(new THREE.PlaneGeometry(LEN, 14), new THREE.MeshLambertMaterial({ map: roadTex }));
   road.rotation.x = -Math.PI / 2;
-  road.position.set(50, 0, 3.5);
+  road.position.set(CENTER, 0, 3.5);
   road.receiveShadow = true;
   scene.add(road);
 
@@ -168,21 +165,21 @@ export function createScene(canvas) {
   walkTex.wrapS = walkTex.wrapT = THREE.RepeatWrapping;
   walkTex.repeat.set(50, 2);
   tryOverrideTexture('ground', walkTex);
-  const walk = new THREE.Mesh(new THREE.PlaneGeometry(200, 5), new THREE.MeshLambertMaterial({ map: walkTex }));
+  const walk = new THREE.Mesh(new THREE.PlaneGeometry(LEN, 5), new THREE.MeshLambertMaterial({ map: walkTex }));
   walk.rotation.x = -Math.PI / 2;
-  walk.position.set(50, 0.01, -2.0);
+  walk.position.set(CENTER, 0.01, -2.0);
   walk.receiveShadow = true;
   scene.add(walk);
 
   // 중앙선
-  for (let x = -10; x < 120; x += 4) {
+  for (let x = -10; x < END + 12; x += 4) {
     const line = new THREE.Mesh(boxG(2, 0.02, 0.3), mat(0x8d82ad));
     line.position.set(x, 0.02, 5);
     scene.add(line);
   }
 
-  // 가게 건물
-  SHOPS.forEach((s) => {
+  // 가게 건물 (레지스트리)
+  PLACES.forEach((s) => {
     if (s.stall) {
       // 포장마차: 줄무늬 천막 + 좌판
       const g = new THREE.Group();
@@ -266,8 +263,9 @@ export function createScene(canvas) {
     }
   });
 
-  // 배경 원경 건물
-  for (let i = 0; i < 16; i++) {
+  // 배경 원경 건물 (거리 길이에 맞춰)
+  const bgCount = Math.ceil(LEN / 8);
+  for (let i = 0; i < bgCount; i++) {
     const h = 6 + Math.random() * 10;
     const w = 4 + Math.random() * 5;
     const b = new THREE.Mesh(boxG(w, h, 5), new THREE.MeshLambertMaterial({ map: tryOverrideTexture('wall', wallTex('#151129', 0.25)) }));
@@ -279,7 +277,7 @@ export function createScene(canvas) {
   }
 
   // 가로등
-  for (let x = 0; x < 110; x += 18) {
+  for (let x = 0; x < END; x += 18) {
     const pole = new THREE.Mesh(boxG(0.15, 3.4, 0.15), mat(0x2a2440));
     pole.position.set(x, 1.7, 1.0);
     scene.add(pole);
@@ -295,13 +293,13 @@ export function createScene(canvas) {
   }
 
   // ── near-side 광장(세로 이동 공간 확장) ──
-  const plaza = new THREE.Mesh(new THREE.PlaneGeometry(220, 13), new THREE.MeshLambertMaterial({ map: walkTex }));
+  const plaza = new THREE.Mesh(new THREE.PlaneGeometry(LEN, 13), new THREE.MeshLambertMaterial({ map: walkTex }));
   plaza.rotation.x = -Math.PI / 2;
-  plaza.position.set(50, 0.006, 10.5);
+  plaza.position.set(CENTER, 0.006, 10.5);
   plaza.receiveShadow = true;
   scene.add(plaza);
   // near-side 벤치 + 가로등(라이트 없이 발광 헤드로 — 라이트 최소화)
-  for (let x = 12; x < 108; x += 24) {
+  for (let x = 12; x < END; x += 24) {
     const bench = box(2, 0.4, 0.6, 0x5a4632);
     bench.position.set(x, 0.25, 12.5);
     scene.add(bench);

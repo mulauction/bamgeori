@@ -159,6 +159,9 @@ async function pick(cup) {
 export default {
   id: 'yabawi',
   name: '야바위 포장마차',
+  sign: '야바위',
+  color: '#ff8f5e',
+  district: 'main',
   sub: '구슬이 든 컵을 끝까지 쫓아가세요. 맞히면 2배.',
   actionLabel: '구슬 넣고 섞기',
   minBet: 500,

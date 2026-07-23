@@ -13,21 +13,8 @@ import { mountGameScreen } from './ui/gameScreen.js';
 import { initBackButton } from './ui/backButton.js';
 import { initBankruptcy } from './ui/bankruptcy.js';
 
-// 게임 4종 (공통 인터페이스)
-import yabawi from './games/yabawi/index.js';
-import dograce from './games/dograce/index.js';
-import cockfight from './games/cockfight/index.js';
-import workDaeri from './games/work-daeri/index.js';
-// 전당포(과시템 상점)
-import shop from './ui/shop.js';
-
-// scene id → 게임 모듈
-const GAMES = {
-  yabawi,
-  dograce,
-  cockfight,
-  'work-daeri': workDaeri,
-};
+// 게임/가게는 레지스트리에서 (등록만 하면 거리에 자동 배치)
+import { getModule } from './games/registry.js';
 
 const homeEl = document.getElementById('home');
 const screenEl = document.getElementById('screen');
@@ -76,15 +63,16 @@ function openScreen(id) {
   screenEl.classList.add('on');
   window.scrollTo(0, 0);
 
-  if (id === 'mall') {
-    current = mountShopScreen(screenEl, shop, closeScreen);
+  const mod = getModule(id);
+  if (!mod) {
+    closeScreen();
+    return;
+  }
+  // start()가 있으면 게임, 없으면 상점(전당포)
+  if (typeof mod.start === 'function') {
+    current = mountGameScreen(screenEl, mod, closeScreen);
   } else {
-    const game = GAMES[id];
-    if (!game) {
-      closeScreen();
-      return;
-    }
-    current = mountGameScreen(screenEl, game, closeScreen);
+    current = mountShopScreen(screenEl, mod, closeScreen);
   }
 }
 

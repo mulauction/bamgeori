@@ -44,6 +44,9 @@ export default {
   id: 'mall',
   name: '황금 전당포',
   sub: '판돈으로는 못 씁니다. 오직 자랑을 위한 물건들.',
+  sign: '전당포',
+  color: '#e0b3ff',
+  district: 'main',
 
   mount(container) {
     listEl = document.createElement('div');

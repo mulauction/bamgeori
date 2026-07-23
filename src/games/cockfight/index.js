@@ -217,6 +217,9 @@ async function lunge(side) {
 export default {
   id: 'cockfight',
   name: '뒷골목 닭싸움장',
+  sign: '닭싸움',
+  color: '#ffd166',
+  district: 'main',
   sub: '능력치는 공개됩니다. 그래도 닭은 닭 마음대로 싸웁니다. 승리 시 1.9배.',
   actionLabel: '싸움 붙이기',
   minBet: 500,

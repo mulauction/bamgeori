@@ -4,7 +4,8 @@
 //  근접 상점 감지 → 입장 버튼/Enter로 화면 진입을 연결한다.
 // ══════════════════════════════════════════════════════════════
 
-import { createScene, SHOPS } from './scene.js';
+import { createScene } from './scene.js';
+import { PLACES, STREET_END } from '../games/registry.js';
 import { createHero } from './character.js';
 import { createControls } from './controls.js';
 import { audio } from '../core/audio.js';
@@ -144,7 +145,7 @@ export function createStreet({ onEnter }) {
       const mx = ix * c + iz * s;
       const mz = -ix * s + iz * c;
       const spd = 0.0058 * dt * (bankrupt ? 0.55 : 1) * (riding ? 1.9 : 1); // 파산 처짐 / 탈것 가속
-      const nx = Math.max(-4, Math.min(108, H.x + mx * spd));
+      const nx = Math.max(-4, Math.min(STREET_END + 4, H.x + mx * spd));
       // 세로 이동: 기본은 넓은 거리, x≈40 골목에서는 뒤쪽으로 더 깊이
       const inAlley = Math.abs(H.x - 40) < 2.6;
       const zMin = inAlley ? -24 : -3.8;
@@ -210,7 +211,7 @@ export function createStreet({ onEnter }) {
 
     // 근접 상점/탈것 감지 → 문맥 버튼
     nearShop = null;
-    SHOPS.forEach((sh) => {
+    PLACES.forEach((sh) => {
       if (Math.abs(H.x - sh.x) < 3.4 && H.z < 1.2) nearShop = sh;
     });
     nearVeh = riding ? null : findNearVehicle();

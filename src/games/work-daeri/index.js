@@ -48,6 +48,9 @@ function endRound() {
 export default {
   id: 'work-daeri',
   name: '새벽 대리운전',
+  sign: '대리',
+  color: '#8affc1',
+  district: 'main',
   sub: '8초 안에 15번 탭하면 손님을 무사히 모십니다. 성공 1,500P / 지각 500P.',
   minBet: 0,
   kind: 'labor',
