@@ -106,9 +106,19 @@ export function mountGameScreen(container, game, onBack) {
       go.disabled = true;
       audio.play('chip'); // 베팅 칩 소리
       audio.startLoop('tension'); // 승부 중 긴장 루프
-      const { win, multiplier } = await game.start(bet, { risk: betPanel.getRisk() });
+      const res = await game.start(bet, { risk: betPanel.getRisk() });
       audio.stopLoop('tension');
       if (!alive) return;
+      // 무승부(push): 판돈 반환, 통계·연출 없음
+      if (res.push) {
+        store.addPoints(bet);
+        result.textContent = '무승부 — 판돈 반환';
+        result.className = 'result';
+        go.disabled = false;
+        game.reset?.();
+        return;
+      }
+      const { win, multiplier } = res;
       const gain = settleWager(store, { win, bet, multiplier, gameId: game.id });
       // 승리 등급 연출(fx) — 사운드/파티클/진동. 패배는 짧고 담백.
       if (win) {

@@ -9,10 +9,11 @@ import dograce from './dograce/index.js';
 import cockfight from './cockfight/index.js';
 import workDaeri from './work-daeri/index.js';
 import holjjak from './holjjak/index.js';
+import rps from './rps/index.js';
 import shop from '../ui/shop.js';
 
 // 등록 순서 = 거리 배치 순서(구역 내). 새 게임은 여기에 추가.
-const MODULES = [yabawi, dograce, cockfight, holjjak, workDaeri, shop];
+const MODULES = [yabawi, dograce, cockfight, holjjak, rps, workDaeri, shop];
 
 // 구역 순서 + 구역별 기본 건물 스타일(간판/게임이 지정 안 하면 사용)
 const DISTRICT_ORDER = ['main', 'yasijang', 'backalley'];
