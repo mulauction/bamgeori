@@ -127,7 +127,7 @@ export function createScene(canvas) {
   moonLight.target = shadowTarget;
   function updateShadowFocus(x, z) {
     shadowTarget.position.set(x, 0, z);
-    moonLight.position.set(x - 12, 34, z + 12);
+    moonLight.position.set(x - 16, 20, z + 16); // 낮은 각도 → 벽·캐릭터 측면을 비춤
   }
 
   // 도로 + 인도
@@ -353,9 +353,9 @@ export function createScene(canvas) {
 
   // ── 시간대(낮/밤) 보간 — k: 0=한밤, 1=한낮 ──
   const NIGHT = {
-    bg: new THREE.Color(0x14122a), amb: new THREE.Color(0x5a5686), ai: 1.35,
-    hs: new THREE.Color(0x8a9ad0), hg: new THREE.Color(0x241f38), hi: 0.7,
-    mc: new THREE.Color(0xbcc8ff), mi: 0.6, orb: new THREE.Color(0xffe9b0),
+    bg: new THREE.Color(0x14122a), amb: new THREE.Color(0x6a6494), ai: 1.9,
+    hs: new THREE.Color(0x9aa8dd), hg: new THREE.Color(0x2c2640), hi: 1.1,
+    mc: new THREE.Color(0xccd6ff), mi: 0.85, orb: new THREE.Color(0xffe9b0),
     fn: 24, ff: 70,
   };
   const DAY = {
