@@ -17,10 +17,11 @@ import mines from './mines/index.js';
 import crash from './crash/index.js';
 import coinflip from './coinflip/index.js';
 import hilo from './hilo/index.js';
+import dice from './dice/index.js';
 import shop from '../ui/shop.js';
 
 // 등록 순서 = 거리 배치 순서(구역 내). 새 게임은 여기에 추가.
-const MODULES = [yabawi, dograce, cockfight, holjjak, rps, ladder, jebi, coinflip, hilo, limbo, mines, crash, workDaeri, shop];
+const MODULES = [yabawi, dograce, cockfight, holjjak, rps, ladder, jebi, coinflip, hilo, dice, limbo, mines, crash, workDaeri, shop];
 
 // 구역 순서 + 구역별 기본 건물 스타일(간판/게임이 지정 안 하면 사용)
 const DISTRICT_ORDER = ['main', 'yasijang', 'backalley'];
