@@ -12,6 +12,7 @@ import { createStreet } from './street/index.js';
 import { mountGameScreen } from './ui/gameScreen.js';
 import { initBackButton } from './ui/backButton.js';
 import { initBankruptcy } from './ui/bankruptcy.js';
+import { initStats } from './ui/statsPanel.js';
 
 // 게임/가게는 레지스트리에서 (등록만 하면 거리에 자동 배치)
 import { getModule } from './games/registry.js';
@@ -116,6 +117,7 @@ function initAudioControls() {
 // ── 부팅 ──
 store.init(); // 저장본 로드(포인트·자산·설정 복원)
 initHud();
+initStats(); // 내 전적 대시보드
 initAudioControls();
 initBankruptcy(); // 파산·재기 연출(화면 명도·훈장 토스트)
 const street = createStreet({ onEnter: openScreen }); // 낮/밤은 자동 시간 흐름

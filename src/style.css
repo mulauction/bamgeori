@@ -48,11 +48,19 @@ body.bankrupt{filter:brightness(.6) saturate(.5)}
 #jump:active{transform:translateY(3px);box-shadow:0 2px 0 #8a1f27}
 
 /* ── 내 자산 ── */
-#assets{padding:14px 16px calc(60px + env(safe-area-inset-bottom))}
+#assets{padding:14px 16px 10px}
 #assets h2{font-size:15px;color:var(--amber);margin-bottom:8px;font-weight:900}
 #garage{display:flex;flex-wrap:wrap;gap:8px}
 #garage .empty{color:var(--dim);font-size:12px}
 .asset-chip{background:var(--panel);border:2px solid var(--line);border-radius:4px;padding:7px 11px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px}
+
+/* 내 전적 대시보드 */
+#statsboard{padding:0 16px calc(70px + env(safe-area-inset-bottom))}
+#statsboard h2{font-size:15px;color:var(--amber);margin:6px 0 8px;font-weight:900}
+.statgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+.stattile{background:var(--panel);border:2px solid var(--line);border-radius:6px;padding:8px 6px;text-align:center}
+.stattile .k{font-size:10px;color:var(--dim);margin-bottom:3px}
+.stattile .v{font-size:14px;font-weight:900;color:var(--paper)}
 
 /* ── 화면(게임/상점) ── */
 #screen{display:none}
