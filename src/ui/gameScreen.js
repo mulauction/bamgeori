@@ -8,7 +8,7 @@ import { createBetControls } from './betControls.js';
 import { store } from '../core/store.js';
 import { audio } from '../core/audio.js';
 import { fx, WIN_GRADE } from '../fx/index.js';
-import { takeBet, settleWager, settleLabor } from '../core/economy.js';
+import { takeBet, settleWager, settleMultiplier, settleLabor } from '../core/economy.js';
 import { toast } from './toast.js';
 import { fmt } from './util.js';
 
@@ -119,15 +119,28 @@ export function mountGameScreen(container, game, onBack) {
         return;
       }
       const { win, multiplier } = res;
-      const gain = settleWager(store, { win, bet, multiplier, gameId: game.id });
-      // 승리 등급 연출(fx) — 사운드/파티클/진동. 패배는 짧고 담백.
-      if (win) {
-        await fx.playWin(fx.gradeOf(multiplier), { amount: gain, multiplier, gameName: game.name });
-        if (!alive) return;
+      // 배수형(플린코·휠 등, 1 미만 부분반환 포함) vs 일반(승/패)
+      if (game.payoutMode === 'multiplier') {
+        const gain = settleMultiplier(store, { bet, multiplier, gameId: game.id });
+        const net = gain - bet;
+        result.textContent = multiplier.toFixed(2) + '배 · ' + (net >= 0 ? '+' : '') + fmt(net) + 'P';
+        result.className = 'result ' + (net > 0 ? 'win' : net < 0 ? 'lose' : '');
+        if (net > 0) {
+          await fx.playWin(fx.gradeOf(multiplier), { amount: gain, multiplier, gameName: game.name });
+          if (!alive) return;
+        } else if (net < 0) {
+          fx.playLose();
+        }
       } else {
-        fx.playLose();
+        const gain = settleWager(store, { win, bet, multiplier, gameId: game.id });
+        if (win) {
+          await fx.playWin(fx.gradeOf(multiplier), { amount: gain, multiplier, gameName: game.name });
+          if (!alive) return;
+        } else {
+          fx.playLose();
+        }
+        showWager(win, gain, bet, multiplier);
       }
-      showWager(win, gain, bet, multiplier);
       go.disabled = false;
       game.reset?.();
     };

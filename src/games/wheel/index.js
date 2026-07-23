@@ -89,6 +89,7 @@ export default {
   actionLabel: '돌리기',
   minBet: 500,
   kind: 'wager',
+  payoutMode: 'multiplier', // 세그먼트 배수(1 미만 포함)
   betUI: {
     risk: { label: '리스크', min: 1, max: 3, step: 1, default: 2, format: (v) => ['', '낮음', '중간', '높음'][v] },
   },

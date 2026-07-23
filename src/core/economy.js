@@ -143,6 +143,18 @@ export function settleWager(store, { win, bet, multiplier, gameId }) {
 }
 
 /**
+ * 배수형 정산 — 결과 배수(0~다수)를 그대로 지급. 배수<1은 부분 반환(부분 손실).
+ * 플린코·휠처럼 칸마다 배수가 다른(1 미만 포함) 게임용. 배수 0 = 전액 손실.
+ * @returns {number} 획득 포인트(= floor(bet × multiplier))
+ */
+export function settleMultiplier(store, { bet, multiplier, gameId }) {
+  const gain = Math.floor(bet * multiplier);
+  if (gain > 0) store.addPoints(gain);
+  store.recordWager({ gameId, win: multiplier >= 1, bet, gain, multiplier });
+  return gain;
+}
+
+/**
  * 노동(재기) 정산. 성공/지각에 따른 고정 보상.
  * 정산 직후 통계 기록 훅(store.recordLabor)을 호출한다.
  * @returns {number} 획득 포인트
