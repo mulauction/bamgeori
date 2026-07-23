@@ -153,6 +153,8 @@ body.bankrupt{filter:brightness(.6) saturate(.5)}
 .towergrid{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
 .towerrow{display:flex;gap:5px}
 .towerrow .minecell{flex:1;aspect-ratio:auto;height:42px}
+.kenogrid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:12px}
+.kenocell{font-size:14px}
 
 /* ── 대리운전 ── */
 .tapzone{height:170px;border-radius:6px;background:var(--panel);border:3px dashed var(--win);
