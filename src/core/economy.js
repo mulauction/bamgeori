@@ -9,6 +9,34 @@ export const START_POINTS = 10000;
 /** 재기 임계치 — 파산 후 노동으로 이 금액에 도달하면 '재기'로 간주 */
 export const COMEBACK_THRESHOLD = 5000;
 
+// ══════════════════════════════════════════════════════════════
+//  RTP 엔진 — 전 게임 공통 환수율(EV) 단일 관리
+//  기획서 5.3: 환수율 95% 내외. 리스크/난이도가 EV를 바꾸지 않게 한다.
+// ══════════════════════════════════════════════════════════════
+export const RTP = 0.95;
+
+/** 당첨확률 prob 인 베팅의 공정 배당. EV = prob × payout = RTP (리스크 무관 일정). */
+export function payoutFor(prob) {
+  if (prob <= 0) return 0;
+  return RTP / prob;
+}
+
+/** 크래시/림보 버스트 지점 표본. P(결과 ≥ x) = RTP/x (x≥RTP). 결과 ∈ [RTP, ∞). */
+export function crashPoint() {
+  const u = 1 - Math.random(); // (0,1]
+  return RTP / u;
+}
+
+/** 확률 prob 로 승패 판정(결과 사전 확정용). */
+export function winByProb(prob) {
+  return Math.random() < prob;
+}
+
+/** 소수 2자리 반올림(배당 표시용). */
+export function round2(x) {
+  return Math.round(x * 100) / 100;
+}
+
 /** 베팅 칩 프리셋 (마지막 '올인'은 UI에서 보유 전액으로 치환) */
 export const CHIP_VALUES = [500, 1000, 5000, 10000, '올인'];
 export const DEFAULT_BET = 1000;
@@ -56,6 +84,18 @@ export const CONFIG = {
     rewardLate: 500,
   },
 };
+
+// ── 기존 게임 RTP 정렬 (EV=RTP로 통일) ──
+// 야바위: 3컵 중 1 적중 → 배당 = RTP/(1/3) ≈ 2.85 (기존 2.0은 RTP 0.67로 과했음)
+CONFIG.yabawi.multiplier = round2(payoutFor(1 / CONFIG.yabawi.cups));
+// 개경주: 각 개 배당 = RTP × 전체가중치 / 개별가중치 (픽 무관 EV=RTP)
+{
+  const total = CONFIG.dograce.dogs.reduce((s, d) => s + d.weight, 0);
+  CONFIG.dograce.dogs.forEach((d) => {
+    d.odds = round2(payoutFor(d.weight / total));
+  });
+}
+// 닭싸움(1.9x)은 능력치 공개→정보 우위가 3층 설계 요소라 그대로 유지(DECISIONS D6).
 
 // ── 전당포(과시템) 가격 ──────────────────────────────────────────
 // 포인트로 구매하지만 판돈으로 되돌릴 수 없는 순수 과시 아이템.

@@ -162,7 +162,7 @@ export default {
   sign: '야바위',
   color: '#ff8f5e',
   district: 'main',
-  sub: '구슬이 든 컵을 끝까지 쫓아가세요. 맞히면 2배.',
+  sub: '구슬이 든 컵을 끝까지 쫓아가세요. 맞히면 2.85배.',
   actionLabel: '구슬 넣고 섞기',
   minBet: 500,
   kind: 'wager',
