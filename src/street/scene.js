@@ -82,7 +82,7 @@ export function createScene(canvas) {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   // 필믹 톤매핑 — 밤거리 네온이 뭉개지지 않고 살아나게
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.25;
+  renderer.toneMappingExposure = 1.0;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
@@ -347,7 +347,7 @@ export function createScene(canvas) {
   const moon = new THREE.Mesh(boxG(3, 3, 0.3), new THREE.MeshBasicMaterial({ color: 0xffe9b0 }));
   moon.position.set(40, 26, -40);
   scene.add(moon);
-  const moonGlow = makeGlow(0xffe9b0, 9);
+  const moonGlow = makeGlow(0xffe9b0, 4.5);
   moonGlow.position.set(40, 26, -39.5);
   scene.add(moonGlow);
 
@@ -359,9 +359,9 @@ export function createScene(canvas) {
     fn: 24, ff: 70,
   };
   const DAY = {
-    bg: new THREE.Color(0x8fb8e8), amb: new THREE.Color(0xfff2d8), ai: 1.95,
-    hs: new THREE.Color(0xaaccff), hg: new THREE.Color(0x6a7a5a), hi: 1.05,
-    mc: new THREE.Color(0xfff0d0), mi: 1.25, orb: new THREE.Color(0xfff6c0),
+    bg: new THREE.Color(0x7aa8d8), amb: new THREE.Color(0xffeecc), ai: 1.4,
+    hs: new THREE.Color(0x9dc0f0), hg: new THREE.Color(0x5a6a4a), hi: 0.75,
+    mc: new THREE.Color(0xfff0d0), mi: 1.0, orb: new THREE.Color(0xfff6c0),
     fn: 42, ff: 115,
   };
   const lerp = (a, b, k) => a + (b - a) * k;

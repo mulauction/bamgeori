@@ -58,7 +58,7 @@ export function makeGlow(color, size = 3) {
       transparent: true,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
-      opacity: 0.9,
+      opacity: 0.28, // 과다 노출 방지 — 가산합성이라 낮게
     })
   );
   s.scale.set(size, size, 1);
