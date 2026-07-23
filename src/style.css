@@ -106,6 +106,9 @@ body.bankrupt{filter:brightness(.6) saturate(.5)}
 .cv3d{width:100%;display:block;touch-action:none}
 .cv3d-hint{position:absolute;left:0;right:0;bottom:8px;text-align:center;font-size:12px;font-weight:700;
   color:var(--paper);text-shadow:0 1px 3px #000;pointer-events:none}
+/* 큰 배수 카운터(림보·크래시 등) */
+.bignum{position:absolute;left:0;right:0;top:10px;text-align:center;font-size:46px;font-weight:900;
+  color:var(--amber);text-shadow:0 2px 12px #000,0 0 20px rgba(255,194,71,.5);pointer-events:none;font-variant-numeric:tabular-nums}
 
 /* ── 개경주 / 닭싸움 선택 ── */
 .dogpick{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
