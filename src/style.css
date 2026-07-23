@@ -72,6 +72,21 @@ body.bankrupt{filter:brightness(.6) saturate(.5)}
 .chip.sel{background:var(--amber);color:#1a1206}
 .betnow{font-weight:900;font-size:16px;margin-top:10px}
 
+/* 리스크 슬라이더 + 확률·배당 실시간 표시 */
+.risklabel{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+.riskval{color:var(--amber);font-weight:900}
+.riskslider{width:100%;margin:6px 0 2px;accent-color:var(--amber)}
+.oddsreadout{display:flex;justify-content:space-between;gap:6px;margin-top:10px;
+  font-size:12px;color:var(--dim);flex-wrap:wrap;background:#0f0c1a;border-radius:5px;padding:8px 10px}
+.oddsreadout b{color:var(--paper)}
+
+/* 대형 캐시아웃/스톱 버튼 (캐시아웃형 게임에서 가장 크게) */
+.stopbtn{width:100%;border:none;border-radius:8px;padding:20px;font-weight:900;font-size:22px;cursor:pointer;
+  background:var(--win);color:#06331d;box-shadow:0 6px 0 #2a8a5a;font-family:sans-serif;
+  position:sticky;bottom:calc(12px + env(safe-area-inset-bottom));z-index:8}
+.stopbtn:active{transform:translateY(3px);box-shadow:0 3px 0 #2a8a5a}
+.stopbtn:disabled{opacity:.4;box-shadow:none}
+
 /* ── 액션 버튼 / 결과 ── */
 /* 액션 버튼: 화면 하단 고정(항상 누를 수 있게) */
 .go{width:100%;border:none;border-radius:6px;padding:15px;font-weight:900;font-size:18px;cursor:pointer;

@@ -4,7 +4,7 @@
 //  포인트 정산은 전부 economy를 통해 일괄 처리한다(게임은 정산 안 함).
 // ══════════════════════════════════════════════════════════════
 
-import { createBetPanel } from './betPanel.js';
+import { createBetControls } from './betControls.js';
 import { store } from '../core/store.js';
 import { audio } from '../core/audio.js';
 import { fx, WIN_GRADE } from '../fx/index.js';
@@ -52,7 +52,7 @@ export function mountGameScreen(container, game, onBack) {
 
   let betPanel = null;
   if (isWager) {
-    betPanel = createBetPanel();
+    betPanel = createBetControls(game);
     scene.appendChild(betPanel.el);
   }
 
@@ -106,7 +106,7 @@ export function mountGameScreen(container, game, onBack) {
       go.disabled = true;
       audio.play('chip'); // 베팅 칩 소리
       audio.startLoop('tension'); // 승부 중 긴장 루프
-      const { win, multiplier } = await game.start(bet);
+      const { win, multiplier } = await game.start(bet, { risk: betPanel.getRisk() });
       audio.stopLoop('tension');
       if (!alive) return;
       const gain = settleWager(store, { win, bet, multiplier, gameId: game.id });
