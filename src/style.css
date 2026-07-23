@@ -156,6 +156,13 @@ body.bankrupt{filter:brightness(.6) saturate(.5)}
 .kenogrid{display:grid;grid-template-columns:repeat(6,1fr);gap:4px;margin-bottom:12px}
 .kenocell{font-size:14px}
 
+/* 케이스 오픈 릴 */
+.reel{position:relative;overflow:hidden;border:2px solid var(--line);border-radius:8px;background:#0f0c1a;height:88px;margin-bottom:12px}
+.reelstrip{display:flex;position:absolute;left:0;top:0;height:100%;align-items:center}
+.reelitem{width:74px;height:70px;margin:0 3px;border-radius:6px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;font-weight:900;font-size:15px;flex:0 0 auto;color:#0d0b16}
+.reelmarker{position:absolute;left:50%;top:0;bottom:0;width:3px;background:var(--lantern);transform:translateX(-50%);z-index:2;box-shadow:0 0 10px var(--lantern)}
+
 /* ── 대리운전 ── */
 .tapzone{height:170px;border-radius:6px;background:var(--panel);border:3px dashed var(--win);
   display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;
