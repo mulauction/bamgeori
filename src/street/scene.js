@@ -80,11 +80,9 @@ const box = (w, h, d, c) => new THREE.Mesh(boxG(w, h, d), mat(c));
 export function createScene(canvas) {
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  // 필믹 톤매핑 — 밤거리 네온이 뭉개지지 않고 살아나게
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.0;
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  // 톤매핑·그림자 없이 단순 렌더 — 일부 모바일 GPU에서 어둠 뭉개짐/블랙 방지(가시성 우선)
+  renderer.toneMapping = THREE.NoToneMapping;
+  renderer.shadowMap.enabled = false;
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x14122a);
@@ -353,15 +351,15 @@ export function createScene(canvas) {
 
   // ── 시간대(낮/밤) 보간 — k: 0=한밤, 1=한낮 ──
   const NIGHT = {
-    bg: new THREE.Color(0x14122a), amb: new THREE.Color(0x6a6494), ai: 1.9,
-    hs: new THREE.Color(0x9aa8dd), hg: new THREE.Color(0x2c2640), hi: 1.1,
-    mc: new THREE.Color(0xccd6ff), mi: 0.85, orb: new THREE.Color(0xffe9b0),
+    bg: new THREE.Color(0x1a1836), amb: new THREE.Color(0x8a84b0), ai: 1.15,
+    hs: new THREE.Color(0x9aa8dd), hg: new THREE.Color(0x3a3450), hi: 0.6,
+    mc: new THREE.Color(0xccd6ff), mi: 0.75, orb: new THREE.Color(0xffe9b0),
     fn: 24, ff: 70,
   };
   const DAY = {
-    bg: new THREE.Color(0x7aa8d8), amb: new THREE.Color(0xffeecc), ai: 1.4,
-    hs: new THREE.Color(0x9dc0f0), hg: new THREE.Color(0x5a6a4a), hi: 0.75,
-    mc: new THREE.Color(0xfff0d0), mi: 1.0, orb: new THREE.Color(0xfff6c0),
+    bg: new THREE.Color(0x7aa8d8), amb: new THREE.Color(0xffeecc), ai: 1.35,
+    hs: new THREE.Color(0x9dc0f0), hg: new THREE.Color(0x5a6a4a), hi: 0.7,
+    mc: new THREE.Color(0xfff0d0), mi: 0.95, orb: new THREE.Color(0xfff6c0),
     fn: 42, ff: 115,
   };
   const lerp = (a, b, k) => a + (b - a) * k;

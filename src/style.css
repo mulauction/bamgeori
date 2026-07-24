@@ -5,8 +5,8 @@
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
 html,body{min-height:100%}
 body{background:var(--bg);color:var(--paper);font-family:sans-serif;overflow-x:hidden;transition:filter .8s}
-/* 파산: 화면 명도·채도 저하(몰락의 가시화) */
-body.bankrupt{filter:brightness(.6) saturate(.5)}
+/* 파산: 화면 명도·채도 저하(몰락의 가시화) — 화면이 안 보일 정도로는 낮추지 않음 */
+body.bankrupt{filter:brightness(.82) saturate(.7)}
 
 /* ── 상단바 ── */
 /* 노치/안전영역: 상단바는 상단 inset, 좌우 inset 반영 */
