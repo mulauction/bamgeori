@@ -92,6 +92,8 @@ function createStore(adapter) {
         // perGame 누락 방어
         if (!state.stats.perGame || typeof state.stats.perGame !== 'object') state.stats.perGame = {};
         state.meta = { ...makeDefaultMeta(), ...(data.meta || {}) };
+        // 저장본 정합성: 돈이 있는데 파산 플래그가 남아있으면 해제
+        if (state.stats.isBankrupt && state.points >= COMEBACK_THRESHOLD) state.stats.isBankrupt = false;
       }
       emit();
     },
@@ -102,6 +104,11 @@ function createStore(adapter) {
     },
     setPoints(n) {
       state.points = Math.max(0, Math.floor(n));
+      // 재기: 파산 상태에서 임계치 이상으로 회복하면 해제(회복 수단 무관)
+      if (state.stats.isBankrupt && state.points >= COMEBACK_THRESHOLD) {
+        state.stats.isBankrupt = false;
+        state.stats.comebacks++;
+      }
       persist();
       emit();
     },
@@ -195,11 +202,7 @@ function createStore(adapter) {
       const s = state.stats;
       if (!s.firstPlayDate) s.firstPlayDate = nowISO();
       s.laborIncome += gain;
-      // 재기 전이: 파산 상태에서 노동으로 재기 임계치 도달
-      if (s.isBankrupt && state.points >= COMEBACK_THRESHOLD) {
-        s.isBankrupt = false;
-        s.comebacks++;
-      }
+      // 재기 해제는 setPoints(addPoints)에서 처리됨
       persist();
       emit();
     },
