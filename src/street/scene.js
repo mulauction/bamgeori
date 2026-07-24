@@ -218,9 +218,6 @@ export function createScene(canvas) {
       const signGlow = makeGlow(s.color, 4);
       signGlow.position.set(0, 3.3, 1.9);
       g.add(signGlow);
-      const lamp = new THREE.PointLight(0xffb347, 1.7, 12);
-      lamp.position.set(0, 2.4, 1.2);
-      g.add(lamp);
       const lampGlow = makeGlow(0xffb347, 2.6);
       lampGlow.position.set(0, 2.4, 1.2);
       g.add(lampGlow);
@@ -240,9 +237,6 @@ export function createScene(canvas) {
       const door = new THREE.Mesh(boxG(1.6, 2.4, 0.2), mat(0xf7d9a0));
       door.position.set(0, 1.2, 3.55);
       g.add(door);
-      const doorLight = new THREE.PointLight(0xffe0a0, 1.3, 8);
-      doorLight.position.set(0, 2.2, 4.2);
-      g.add(doorLight);
       const sign = new THREE.Mesh(
         new THREE.PlaneGeometry(s.w * 0.72, s.w * 0.18),
         new THREE.MeshBasicMaterial({ map: signTex(s.sign, s.color) })
@@ -252,9 +246,6 @@ export function createScene(canvas) {
       const signGlow = makeGlow(s.color, s.w * 0.9);
       signGlow.position.set(0, s.h - 0.8, 3.8);
       g.add(signGlow);
-      const neon = new THREE.PointLight(new THREE.Color(s.color), 1.6, 13);
-      neon.position.set(0, s.h - 0.8, 4.6);
-      g.add(neon);
       g.position.set(s.x, 0, -6.5);
       scene.add(g);
       addSolid(s.x, -6.5, s.w, 7); // 가게 건물
@@ -282,9 +273,6 @@ export function createScene(canvas) {
     const head = new THREE.Mesh(boxG(0.5, 0.3, 0.5), mat(0xffe9b0));
     head.position.set(x, 3.4, 1.0);
     scene.add(head);
-    const l = new THREE.PointLight(0xffd98a, 1.5, 11);
-    l.position.set(x, 3.2, 1.0);
-    scene.add(l);
     const glow = makeGlow(0xffd98a, 2.2);
     glow.position.set(x, 3.35, 1.0);
     scene.add(glow);
@@ -351,10 +339,10 @@ export function createScene(canvas) {
 
   // ── 시간대(낮/밤) 보간 — k: 0=한밤, 1=한낮 ──
   const NIGHT = {
-    bg: new THREE.Color(0x1a1836), amb: new THREE.Color(0x8a84b0), ai: 1.15,
-    hs: new THREE.Color(0x9aa8dd), hg: new THREE.Color(0x3a3450), hi: 0.6,
-    mc: new THREE.Color(0xccd6ff), mi: 0.75, orb: new THREE.Color(0xffe9b0),
-    fn: 24, ff: 70,
+    bg: new THREE.Color(0x1a1836), amb: new THREE.Color(0x9a94c0), ai: 1.5,
+    hs: new THREE.Color(0xa4b0e0), hg: new THREE.Color(0x3a3450), hi: 0.8,
+    mc: new THREE.Color(0xd6def0), mi: 1.0, orb: new THREE.Color(0xffe9b0),
+    fn: 30, ff: 90,
   };
   const DAY = {
     bg: new THREE.Color(0x7aa8d8), amb: new THREE.Color(0xffeecc), ai: 1.35,
