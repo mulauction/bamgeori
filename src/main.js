@@ -114,10 +114,21 @@ function initAudioControls() {
   document.getElementById('topbar').insertBefore(btn, document.getElementById('wallet'));
 }
 
+// ── 테스트용 충전 버튼(상단바) — 출시 전 제거 ──
+function initTestTopup() {
+  const btn = document.createElement('button');
+  btn.id = 'topupbtn';
+  btn.textContent = '🪙+';
+  btn.title = '테스트 충전 1천만 P';
+  btn.onclick = () => store.addPoints(10000000);
+  document.getElementById('topbar').insertBefore(btn, document.getElementById('wallet'));
+}
+
 // ── 부팅 ──
 store.init(); // 저장본 로드(포인트·자산·설정 복원)
 initHud();
 initStats(); // 내 전적 대시보드
+initTestTopup(); // ⚠️ 테스트 충전 버튼 (출시 전 제거)
 initAudioControls();
 initBankruptcy(); // 파산·재기 연출(화면 명도·훈장 토스트)
 const street = createStreet({ onEnter: openScreen }); // 낮/밤은 자동 시간 흐름
